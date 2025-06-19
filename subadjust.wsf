@@ -1,0 +1,93 @@
+<job id="allargs">
+  <script language="vbscript">
+    function VBArgs()
+      redim vargs(WScript.Arguments.Count - 1)
+      dim i
+      for i = 0 to WScript.Arguments.Count - 1
+        vargs(i) = WScript.Arguments(i)
+      next
+      VBArgs = vargs
+    end function
+  </script>
+  <script language="jscript">
+    var activeX = [];
+
+    function callActiveX(AXName, add) {
+      if (typeof activeX[AXName] === 'undefined') activeX[AXName] = new ActiveXObject(AXName);
+      return activeX[AXName];
+    }
+
+    function fso() {
+      return callActiveX("Scripting.FileSystemObject");
+    }
+
+    function wsh() {
+      return callActiveX("WScript.Shell");
+    }
+
+    function sha() {
+      return callActiveX("Shell.Application");
+    }
+
+    WEBAPP_PATH = "C:\\Users\\Denis\\Documents\\home\\33-webapp\\build\\msvc\\win\\x64\\Release\\webapp.exe"
+    log = function(msg) {
+      wscript.echo(msg);
+    }
+
+    function Args() {
+      this.All = (new VBArray(VBArgs())).toArray();
+      this.Unnamed = [];
+      this.Named = [];
+      this.Named.length = 0;
+      var i = 0,
+        j = 0;
+
+      while (i < this.All.length) {
+        if (this.All[i].substring(0, 1) === "/") {
+          n = this.All[i].split(':');
+          this.Named[n[0].substr(1)] = "";
+          if (typeof n[1] != "undefined") this.Named[n[0].substr(1)] = n[1];
+          this.Named.length++;
+        } else {
+          this.Unnamed[j++] = this.All[i];
+        }
+
+        i++;
+      }
+
+
+      this.GetAll = function() {
+        var s = "";
+        var not_first=false;
+        for (var k in this.All) {
+          s += '"'+this.All[k]+'"';
+          if (not_first) s+= " ";
+          else not_first=true;
+        }
+        return s;
+      }
+
+      this.ListAll = function() {
+        log("AllArgs:" + this.All.length);
+        for (var k in this.All) log(k + ":" + this.All[k]);
+      }
+
+      this.ListNamed = function() {
+        var s = "";
+        for (var k in this.Named) s += "\n" + k + ":" + this.Named[k];
+        log("NamedArgs:" + this.Named.length + s);
+      }
+
+      this.ListUnnamed = function() {
+        var s = "";
+        for (var k in this.Unnamed) s += "\n" + k + ":" + this.Unnamed[k];
+        log("UnamedArgs:" + this.Unnamed.length + s);
+      }
+    }
+
+    var path = fso().GetParentFolderName(WScript.ScriptFullName);
+    var myArgs = new Args();
+    //wsh().popup(myArgs.GetAll());
+    sha().ShellExecute(WEBAPP_PATH, path + " -d " + myArgs.GetAll(), path, "open", 1);
+  </script>
+</job>
