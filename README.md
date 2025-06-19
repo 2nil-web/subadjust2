@@ -1,17 +1,17 @@
-# GUI-TAIL-F
+# SubAdjust
 
-*A GUI to make some kind of "tail -f" on files. Continuously polling a file to see its changes*
+*A GUI to correct the timeline of subtitles in .srt format
 
 ## Under Windows
 
-    Drop any text file you want to poll on the "gui-tail-f.wsf" script file.
+    Drop any text file you want to poll on the "subadjust.wsf" script file.
 
     Or run it without any parameter and open the file you want to poll.
 
     You may even use it at the command line (command or powershell) like so:
 
 ```bash
-gui-tail-f path\to\my\file\to\poll
+subadjust path\to\my\file\to\modify
 ```
 
 ## Under Linux
@@ -23,5 +23,8 @@ gui-tail-f path\to\my\file\to\poll
     You may even use it at the command line (bash or shell) like so:
 
 ```bash
-gui-tail-f path/to/my/file/to/poll
+subadjust path/to/my/file/to/modify
 ```
+
+This app needs the webapp program (https://github.com/2nil-web/webapp.git)
+
