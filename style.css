@@ -14,7 +14,7 @@ table {
 
 .topnav {
   overflow: hidden;
-/*  border-bottom: 1px solid black;*/
+  /*  border-bottom: 1px solid black;*/
   /*background-color: #333;*/
   /*background-color: #cccccc;*/
 }
@@ -22,14 +22,15 @@ table {
 .topnav a {
   border: 1px solid black;
   /* Top right bottom left */
-  margin: 2px 4px;/* 4px 4px;*/
+  margin: 2px 4px;
+  /* 4px 4px;*/
   float: left;
   /*color: #f2f2f2;*/
   color: #0;
   text-align: center;
   padding: 2px 12px;
   text-decoration: none;
-/*  font-size: 17px;*/
+  /*  font-size: 17px;*/
 }
 
 .topnav a:hover {
@@ -54,23 +55,25 @@ fieldset {
 
 #filepath {
   margin-right: 0px;
-  width:84%;
+  width: 98%;
 }
 
-input[type='number']{
+input[type='number'] {
   margin-top: 2px;
   width: 40px;
-} 
+}
+
 .file_view {
   position: absolute;
   border: 1px solid black;
-  inset: 300px 4px 4px 4px;
+  inset: 330px 4px 4px 4px;
   /* top right bottom left */
   /*top: 110px; right: 8px; left: 8px; bottom: 4px;*/
   overflow-y: auto;
   font-family: monospace;
   white-space: pre;
   /*  word-wrap: break-word;*/
-/*  white-space: nowrap;*/
+  /*  white-space: nowrap;*/
   resize: none;
+  white-space: nowrap;
 }

@@ -1,13 +1,14 @@
 <job id="allargs">
   <script language="vbscript">
     function VBArgs()
-      redim vargs(WScript.Arguments.Count - 1)
-      dim i
-      for i = 0 to WScript.Arguments.Count - 1
-        vargs(i) = WScript.Arguments(i)
-      next
-      VBArgs = vargs
-    end function
+    redim vargs(WScript.Arguments.Count - 1)
+    dim i
+    for i = 0 to WScript.Arguments.Count - 1
+    vargs(i) = WScript.Arguments(i)
+    next
+    VBArgs = vargs
+    end
+    function
   </script>
   <script language="jscript">
     var activeX = [];
@@ -58,11 +59,11 @@
 
       this.GetAll = function() {
         var s = "";
-        var not_first=false;
+        var not_first = false;
         for (var k in this.All) {
-          s += '"'+this.All[k]+'"';
-          if (not_first) s+= " ";
-          else not_first=true;
+          s += '"' + this.All[k] + '"';
+          if (not_first) s += " ";
+          else not_first = true;
         }
         return s;
       }
