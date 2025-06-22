@@ -70,7 +70,7 @@ var max_width = 0,
     //console.log(`Monitors: ${JSON.stringify(mons)}`);
     for (const [key, mon] of Object.entries(mons)) {
       //console.log(`${key}: ${JSON.stringify(mon)}`);
-      working_area=mon['working area'];
+      working_area = mon['working area'];
       //console.log(`${key}[working area]: ${JSON.stringify(working_area)}`);
       if (working_area[2] > max_width)
         max_width = working_area[2];
