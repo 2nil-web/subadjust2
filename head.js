@@ -55,16 +55,25 @@ async function load_file() {
   read_file(await gui.opendlg());
 }
 
-var max_width = 0,
-  max_height = 0;
-(async () => {
-  if (typeof app.sysname !== "undefined") {
-    /*
-    for (const key of Object.keys(localStorage))
-      console.log(key+": "+localStorage.getItem(key));
-    localStorage.clear();
-    */
+if (typeof app.sysname !== "undefined") {
+  /*
+  for (const key of Object.keys(localStorage))
+    console.log(key+": "+localStorage.getItem(key));
+  localStorage.clear();
+  */
 
+  app.set_icon("app.ico");
+
+  function clean_exit() {
+    console.log("clean_exit");
+    localStorage.setItem(document.title + "_incr", "0");
+    bc.close();
+    app.exit();
+  }
+
+  var max_width = 0,
+    max_height = 0;
+  (async () => {
     // Get the max width and height of the working area
     mons = await win.monitors_info();
     //console.log(`Monitors: ${JSON.stringify(mons)}`);
@@ -77,68 +86,54 @@ var max_width = 0,
       if (working_area[3] > max_height)
         max_height = working_area[3];
     }
-    console.log(`max_width=${max_width}, max_height=${max_height}`);
+    //console.log(`max_width=${max_width}, max_height=${max_height}`);
+  })();
 
-    // To try to juxtapose multiple subadjust instances
-    var bc = new BroadcastChannel(document.title);
 
-    app.set_icon("app.ico");
+  // To try to juxtapose multiple subadjust instances
+  var bc = new BroadcastChannel(document.title);
 
-    bc.onmessage = (event) => {
-      inc++;
-      //new_title=app.title.replace(/\d* - /, inc+" - ");
-      //app.set_title(new_title);
-      var newX = app.x - (app.w - (app.left_border + app.right_border));
-      if (newX < 0) newX = 0;
-      console.log(`new X: ${newX}`);
-      app.set_pos(newX, app.y);
-    }
+  bc.onmessage = (event) => {
+    inc++;
+    //new_title=app.title.replace(/\d* - /, inc+" - ");
+    //app.set_title(new_title);
+    var newX = app.x - (app.w - (app.left_border + app.right_border));
+    if (newX < 0) newX = 0;
+    console.log(`new X: ${newX}`);
+    app.set_pos(newX, app.y);
+  }
 
-    if (inc === 0) {
-      // Tell the other pages I'm here
-      bc.postMessage('run_increment');
-    }
+  if (inc === 0) {
+    // Tell the other pages I'm here
+    bc.postMessage('run_increment');
+  }
 
-    args = app.args_line.split(',');
-    //for (var i = 0; i < args.length; i++) { console.log(`args[${i}]=${args[i]}`); }
+  var args = app.args_line.split(',');
+  //for (var i = 0; i < args.length; i++) { console.log(`args[${i}]=${args[i]}`); }
 
-    window.addEventListener("load", do_load);
+  async function do_load() {
+    document.addEventListener("keyup", exit_on_esc);
+    await app.set_size(418, 600, 1);
+    if (app.x < 0) correcX = 0;
+    else if (app.x > max_width) correcX = max_width;
+    else correcX = app.x;
+    if (app.y < 0) correcY = 0
+    else if (app.y > max_height) correcX = max_height;
+    else correcY = app.y;
+    app.set_pos(correcX, correcY);
+    await app.show();
+    file_content = document.getElementById("file_content");
 
-    function clean_exit() {
-      console.log("clean_exit");
-      localStorage.setItem(document.title + "_incr", "0");
-      bc.close();
-      app.exit();
-    }
-
-    async function do_load() {
-      document.addEventListener("keyup", exit_on_esc);
-      await app.set_size(420, 600, 1);
-      if (app.x < 0) correcX = 0;
-      else if (app.x > max_width) correcX = max_width;
-      else correcX = app.x;
-
-      if (app.y < 0) correcY = 0
-      else if (app.y > max_height) correcX = max_height;
-      else correcY = app.y;
-
-      app.set_pos(correcX, correcY);
-
-      await app.show();
-      file_content = document.getElementById("file_content");
-
-      if (args.length >= 2) {
-        read_file(args[1]);
-      }
-
+    if (args.length >= 2) {
+      read_file(args[1]);
     }
   }
-})();
 
-function exit_on_esc() {
-  if (event.keyCode === 27) clean_exit();
+  window.addEventListener("load", do_load);
 }
 
-
-
-//        elt.vars.forEach((vl) => { });
+function exit_on_esc() {
+  if (typeof app.sysname !== "undefined") {
+    if (event.keyCode === 27) clean_exit();
+  }
+}

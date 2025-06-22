@@ -1,16 +1,15 @@
 <job id="allargs">
+  <!-- beautify ignore:start -->
   <script language="vbscript">
     function VBArgs()
-    redim vargs(WScript.Arguments.Count - 1)
-    dim i
-    for i = 0 to WScript.Arguments.Count - 1
-    vargs(i) = WScript.Arguments(i)
-    next
-    VBArgs = vargs
-    end
-
-    function
+      redim vargs(WScript.Arguments.Count - 1)
+      for i = 0 to WScript.Arguments.Count - 1
+        vargs(i) = WScript.Arguments(i)
+      next
+      VBArgs = vargs
+    end function
   </script>
+  <!-- beautify ignore:end -->
   <script language="jscript">
     var activeX = [];
 
