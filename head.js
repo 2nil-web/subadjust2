@@ -35,6 +35,7 @@ function basename(path) {
 }
 
 var inc = 0;
+var subs;
 async function read_file(filename) {
   filename = decodeHtml(filename);
   //console.log("read_file: [" + filename + ']');
@@ -45,6 +46,10 @@ async function read_file(filename) {
       app.set_title(document.title + " - " + basename(filename));
       filepath.value = filename;
       file_content.innerText = await fs.read(filename);
+      subs = file_content.innerText.to_subtitles();
+      start_time.value=subs.first_appearance_timecode.replace(/,/, '.');
+      end_time.value=subs.last_appearance_timecode.replace(/,/, '.');
+      console.log(subs);
     } else {
       gui.msgbox(`File [${filename}] does not exists.`);
     }
@@ -137,3 +142,78 @@ function exit_on_esc() {
     if (event.keyCode === 27) clean_exit();
   }
 }
+
+// Return a time code in the form hh:mm:ss,sss or hh:mm:ss.sss in milliseconds
+function tc_to_ms(tc)
+{
+  const re2=/(\d+):(\d+):(\d+),(\d+)/;
+  var m=tc.match(re2);
+  var ms=0;
+  if (m.length >= 2) ms=parseInt(m[1])*3600;
+  if (m.length >= 3) ms+=parseInt(m[2])*60;
+  if (m.length >= 4) ms+=parseInt(m[3]);
+  ms*=1000;
+  if (m.length >= 5) ms+=parseInt(m[4]);
+  return ms;
+}
+
+// Millisecond to time code correct for integer number up to 100 hours (3 600 000 000)
+function ms_to_tc(ms)
+{
+  // Pad number with 0 to obtain a string of 9 characters long
+  var s=ms.toString().padStart(9, '0')
+  console.log(s);
+  const re=/(\d\d)(\d\d)(\d\d)(\d\d\d)/;
+  var m=s.match(re);
+  console.log(m[1]+':'+m[2]+':'+m[3]+','+m[4]);
+  var tc=m[1]+':'+m[2]+':'+m[3]+','+m[4];
+
+  return tc;
+}
+
+// Analyze a string as subtitles in subrip format and return the corresponding json structured array
+String.prototype.to_subtitles = function() {
+  const array1 = [1, 2, 3];
+
+  array1.unshift(4, 5);
+  console.log(array1);
+  // Expected output: Array [4, 5, 1, 2, 3]
+
+  const re = /^\s*(\d+:\d+:\d+,\d+)[^\S\n]+-->[^\S\n]+(\d+:\d+:\d+,\d+)((?:\n(?!\d+:\d+:\d+,\d+\b|\n+\d+$).*)*)/gm;
+  var m = this.matchAll(re);
+
+  let nsub = 0;
+  var sub_arr = [];
+  for (const sub of m) {
+    if (sub.length === 4) {
+      var ams = tc_to_ms(sub[1]);
+      var dms = tc_to_ms(sub[2]);
+      sub_arr.push({
+        "appearance_timecode": sub[1],
+        "disappearance_timecode": sub[2],
+        "appearance_ms": ams,
+        "disappearance_ms": dms,
+        "text": sub[3].trim("\n").trim("\r")
+      });
+    } else sub_arr.push(`{ "error": "Issue with subtitle number ${nsub}" }`);
+    nsub++;
+  }
+
+  fatc = sub_arr[0].appearance_timecode;
+  latc = sub_arr.at(-1).appearance_timecode;
+  ldtc = sub_arr.at(-1).disappearance_timecode;
+  dur_ms=tc_to_ms(ldtc)-tc_to_ms(fatc);
+  dur_tc=ms_to_tc(dur_ms);
+
+  var subs={
+    "first_appearance_timecode": fatc,
+    "last_appearance_timecode": latc,
+    "last_disappearance_timecode": ldtc,
+    "subs_duration_tc": dur_tc,
+    "subs_duration_ms": dur_ms,
+    "subtitles": sub_arr
+  };
+  console.log(subs);
+
+  return subs;
+};

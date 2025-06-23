@@ -47,7 +47,7 @@
                     <label for="start_time">Start:</label>
                   </td>
                   <td>
-                    <input id="start_time" type="time" step="1" value="00:00:00" />
+                    <input id="start_time" type="time" step="0.001" value="00:00:00" />
                   </td>
                   <td>
                 </tr>
@@ -56,7 +56,7 @@
                     <label for="end_time">End:</label>
                   </td>
                   <td>
-                    <input id="end_time" type="time" step="1" value="01:01:01" />
+                    <input id="end_time" type="time" step="0.001" value="01:01:01" />
                   </td>
                   <td>
                 </tr>
@@ -96,10 +96,10 @@
   <div class="topnav">
     <fieldset style="width: 340px">
       <legend>Go to</legend>
-      <a onclick="">Start</a>
-      <a onclick="">Middle line</a>
+      <a onclick="file_content.scrollTop=0">Start</a>
+      <a onclick="file_content.scrollTop=file_content.scrollHeight/2">Middle line</a>
       <a onclick="">Middle time</a>
-      <a onclick="">End</a>
+      <a onclick="file_content.scrollTop=file_content.scrollHeight">End</a>
     </fieldset>
   </div>
   <div autofocus id="file_content" class="file_view" contentEditable=true spellCheck="false"></div>
