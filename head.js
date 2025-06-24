@@ -46,7 +46,7 @@ async function read_file(filename) {
 }
 
 async function reload_file() {
-  var oldSubText = file_text.innerHTML;
+  var oldSubText = file_text.innerText;
   var newSubText=await fs.read(filepath.value);
 
   if (newSubText == oldSubText) return;
