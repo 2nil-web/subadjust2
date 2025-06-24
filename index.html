@@ -18,8 +18,8 @@
   </div>
 
   <div class="topnav">
-    <a onclick="load_file()">Open</a>
-    <a onclick="">Reload</a>
+    <a onclick="open_file()">Open</a>
+    <a onclick="reload_file()">Reload</a>
     <a onclick="">Save</a>
     <a onclick="">Save As</a>
     <a style="position: absolute; right:7px;" onclick="about()">About</a>
@@ -94,15 +94,18 @@
     </fieldset>
   </div>
   <div class="topnav">
-    <fieldset style="width: 340px">
+    <fieldset style="width: 382px">
       <legend>Go to</legend>
-      <a onclick="file_content.scrollTop=0">Start</a>
-      <a onclick="file_content.scrollTop=file_content.scrollHeight/2">Middle line</a>
-      <a onclick="">Middle time</a>
-      <a onclick="file_content.scrollTop=file_content.scrollHeight">End</a>
+      <a id="toTop">Start</a>
+      <a id="toMiddleLine">Middle line</a>
+      <a id="toMiddleSub">Middle sub</a>
+      <a id="toMiddleTime">Middle time</a>
+      <a id="toBottom">End</a>
     </fieldset>
   </div>
-  <div autofocus id="file_content" class="file_view" contentEditable=true spellCheck="false"></div>
+  <div id="file_container" class="file_container" >
+  <div autofocus id="file_lines" class="file_lines" spellCheck="false"></div>
+  <div autofocus id="file_text" class="file_text" contentEditable=true spellCheck="false"></div>
+  </div>
 </body>
-
 </html>
