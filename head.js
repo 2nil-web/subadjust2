@@ -142,37 +142,72 @@ if (typeof app.sysname !== "undefined") {
 
     toTop.addEventListener("click", () => {
       file_container.scrollTop = 0;
+      current_line_number.value = 1;
     });
 
     toMiddleLine.addEventListener("click", () => {
-      console.log(`BEFORE: scrollTop=${file_container.scrollTop}`);
-      console.log(`scrollHeight=${file_container.scrollHeight}`);
       const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
-      console.log(`lh=${lh}`);
-
-      file_container.scrollTop = (file_container.scrollHeight / 2) - lh;
-
-      console.log(`AFTER: scrollTop=${file_container.scrollTop}`);
+      const ln = parseInt((file_container.scrollHeight / 2)) - lh;
+      //console.log(`Middle line number: ${parseInt(ln / lh)+1}, file_container.scrollHeight: ${file_container.scrollHeight}`);
+      file_container.scrollTop = ln;
+      current_line_number.value = 1 + ln / lh;
     });
 
     toMiddleSub.addEventListener("click", () => {
-      console.log(`BEFORE: scrollTop=${file_container.scrollTop}`);
-      console.log(`scrollHeight=${file_container.scrollHeight}`);
+      var subn = parseInt(subs.sub_number / 2);
+      const re = new RegExp('\n' + subn + '\n');
+      var pos = file_text.innerText.search(re);
+
+      if (pos != -1) {
+        var ln = 1 + parseInt(file_text.innerText.substring(0, pos).count_lines());
+        const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
+        //console.log(`Midlle sub number: ${subn}, character pos: ${pos}, line number: ${ln}, lh: ${lh}`);
+        file_container.scrollTop = ln * lh;
+        //console.log(`current_line_number.value: ${current_line_number}, changing to ${(ln).toString()}`);
+        current_line_number.value = ln + 1;
+      }
+    });
+
+    toMiddleTime.addEventListener("click", () => {
+      var tc = subs.last_appearance_timecode;
+      var closest_ms = tc_to_ms(tc);
+      var mid_ms = closest_ms / 2;
+      var nlines = 0;
+
+      for (sub of subs.subtitles) {
+        var diff_ms = mid_ms - sub.appearance_ms;
+        if (diff_ms < 0) break;
+
+        if (closest_ms > diff_ms) {
+          closest_ms = diff_ms;
+          closest_tc = sub.appearance_timecode;
+          closest_line = nlines;
+        }
+
+        nlines += (4 + sub.text.count_lines());
+      }
+
+      mid_tc = new Date(mid_ms).toISOString().slice(11, 23);
+      //console.log(`mid_ms: ${mid_ms}, mid_tc: ${mid_tc}, closest_tc: ${closest_tc}, closest_line: ${closest_line}`);
       const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
-      console.log(`lh=${lh}`);
+      file_container.scrollTop = (closest_line + 1) * lh;
+      current_line_number.value = closest_line + 2;
+    });
 
-      file_container.scrollTop = (file_container.scrollHeight / 2) - lh;
-
-      console.log(`AFTER: scrollTop=${file_container.scrollTop}`);
+    current_line_number.addEventListener("change", (e) => {
+      const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
+      console.log(`e.target.value: ${e.target.value}, lh: ${lh}`);
+      file_container.scrollTop = (e.target.value - 1) * lh;
     });
 
     toBottom.addEventListener("click", () => {
       const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
-      file_container.scrollTop = (file_container.scrollHeight - 20 * lh);
+      file_container.scrollTop = file_container.scrollHeight;
+      current_line_number.value = subs.line_number;
     });
 
     file_text.addEventListener("focusin", () => {
-      console.log("May plan to update subs.");
+      //console.log("May plan to update subs.");
       oldText = file_text.innerText;
     });
 
@@ -181,7 +216,7 @@ if (typeof app.sysname !== "undefined") {
         console.log("Effective subs updating.");
         file_text.innerText.to_subtitles();
       } else {
-        console.log("Not necessary to update subs.");
+        //console.log("Not necessary to update subs.");
       }
 
       planTextUpdate = false;
@@ -189,7 +224,7 @@ if (typeof app.sysname !== "undefined") {
     });
 
     file_text.addEventListener("input", () => {
-      console.log("Plan to update subs.");
+      //console.log("Plan to update subs.");
       planTextUpdate = true;
     });
   }
@@ -259,10 +294,9 @@ String.prototype.remove_last_empty_lines = function() {
     if (p == -1) break;
     l = s.substring(p).trim();
     if (l.length === 0) {
-      console.log(`Removing [${l}] after pos ${p}`);
+      //console.log(`Removing [${l}] after pos ${p}`);
       s = s.substring(0, p);
     } else break;
-    console.log("rem 1line");
   }
 
   return s;
@@ -307,7 +341,7 @@ String.prototype.to_subtitles = function() { //return;
   }
 
   // Remove last 2 lines of correctSubLines
-  console.log("to_sub rem lines");
+  //console.log("to_sub rem lines");
   correctSubText = correctSubText.remove_last_empty_lines();
   nlines = correctSubText.count_lines() + 1;
 
