@@ -12,25 +12,33 @@ table {
   width: 100%
 }
 
+label {
+  display: block;
+  width: x;
+  height: y;
+  text-align: right;
+}
+
+#filepath {
+  overflow-x: auto;
+  resize: none;
+  white-space: nowrap;
+  width: 100%;
+}
+
 .topnav {
   overflow: hidden;
-  /*  border-bottom: 1px solid black;*/
-  /*background-color: #333;*/
-  /*background-color: #cccccc;*/
 }
 
 .topnav a {
   border: 1px solid black;
   /* Top right bottom left */
-  margin: 2px 4px 2px 4px;
-  /* 4px 4px;*/
+  margin: 1px 4px 1px 4px;
   float: left;
-  /*color: #f2f2f2;*/
   color: #0;
   text-align: center;
-  padding: 2px 12px;
+  padding: 2px 8px;
   text-decoration: none;
-  /*  font-size: 17px;*/
 }
 
 .topnav a:hover {
@@ -53,32 +61,30 @@ fieldset {
   margin: 2px 2px 4px 4px;
 }
 
-#filepath {
-  margin-right: 0px;
-  width: 98%;
-}
-
 input[type='number'] {
   margin-top: 2px;
   width: 40px;
 }
 
-.file_lines {
+#file_lines {
   overflow: hidden;
   /* top right bottom left */
   /*inset: 330px 4px 4px 40px;*/
-  width: 10%;
-  border: unset ;
+  position: absolute;
+  left: 2px;
+
+  /*width: 10%;*/
+  border: unset;
   border: 1px solid white;
   font-family: monospace;
   white-space: pre;
   text-align: end;
 }
 
-.file_text {
+#file_text {
   overflow: hidden;
-  /* top right bottom left
-  margin-left: 21%; */
+  /* top right bottom left*/
+  margin-left: 34px;
   width: 90%;
   border: 1px solid blue;
   font-family: monospace;
@@ -86,12 +92,12 @@ input[type='number'] {
 }
 
 
-.file_container {
+#file_container {
   display: flex;
   position: absolute;
-  border: unset ;
+  border: unset;
   /* top right bottom left */
-  inset: 330px 4px 4px 4px;
+  inset: 380px 4px 4px 4px;
   line-height: 1em;
   /*top: 110px; right: 8px; left: 8px; bottom: 4px;*/
   overflow-y: auto;

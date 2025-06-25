@@ -21,10 +21,15 @@ function basename(path) {
 var inc = 0;
 var subs;
 
+// *fs.write: at least 1 parameter, truncate and write to the file who's name is provided as the first parameter, the content of all the following parameters, return true if the operation was OK, else false.
+async function save_file() {
+  await fs.write(filepath.value, file_text.innerText);
+}
+
 async function load_subs(subText) {
   subs = subText.to_subtitles();
-  start_time.value=subs.first_appearance_timecode.replace(/,/, '.');
-  end_time.value=subs.last_appearance_timecode.replace(/,/, '.');
+  start_time.value = subs.first_appearance_timecode.replace(/,/, '.');
+  end_time.value = subs.last_appearance_timecode.replace(/,/, '.');
   console.log(subs);
 }
 
@@ -47,7 +52,7 @@ async function read_file(filename) {
 
 async function reload_file() {
   var oldSubText = file_text.innerText;
-  var newSubText=await fs.read(filepath.value);
+  var newSubText = await fs.read(filepath.value);
 
   if (newSubText == oldSubText) return;
 
@@ -56,8 +61,8 @@ async function reload_file() {
   }
 }
 
-var oldText="";
-var planTextUpdate=false;
+var oldText = "";
+var planTextUpdate = false;
 
 async function open_file() {
   read_file(await gui.opendlg());
@@ -121,7 +126,7 @@ if (typeof app.sysname !== "undefined") {
 
   async function do_load() {
     document.addEventListener("keyup", exit_on_esc);
-    await app.set_size(464, 600, 1);
+    await app.set_size(400, 600, 1);
     if (app.x < 0) correcX = 0;
     else if (app.x > max_width) correcX = max_width;
     else correcX = app.x;
@@ -136,16 +141,16 @@ if (typeof app.sysname !== "undefined") {
     }
 
     toTop.addEventListener("click", () => {
-      file_container.scrollTop=0;
+      file_container.scrollTop = 0;
     });
 
     toMiddleLine.addEventListener("click", () => {
       console.log(`BEFORE: scrollTop=${file_container.scrollTop}`);
       console.log(`scrollHeight=${file_container.scrollHeight}`);
-      const lh= parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
+      const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
       console.log(`lh=${lh}`);
 
-      file_container.scrollTop=(file_container.scrollHeight/2)-lh;
+      file_container.scrollTop = (file_container.scrollHeight / 2) - lh;
 
       console.log(`AFTER: scrollTop=${file_container.scrollTop}`);
     });
@@ -153,22 +158,22 @@ if (typeof app.sysname !== "undefined") {
     toMiddleSub.addEventListener("click", () => {
       console.log(`BEFORE: scrollTop=${file_container.scrollTop}`);
       console.log(`scrollHeight=${file_container.scrollHeight}`);
-      const lh= parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
+      const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
       console.log(`lh=${lh}`);
 
-      file_container.scrollTop=(file_container.scrollHeight/2)-lh;
+      file_container.scrollTop = (file_container.scrollHeight / 2) - lh;
 
       console.log(`AFTER: scrollTop=${file_container.scrollTop}`);
     });
 
     toBottom.addEventListener("click", () => {
-      const lh= parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
-      file_container.scrollTop=(file_container.scrollHeight-20*lh);
+      const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
+      file_container.scrollTop = (file_container.scrollHeight - 20 * lh);
     });
 
     file_text.addEventListener("focusin", () => {
       console.log("May plan to update subs.");
-      oldText=file_text.innerText;
+      oldText = file_text.innerText;
     });
 
     file_text.addEventListener("focusout", () => {
@@ -179,13 +184,13 @@ if (typeof app.sysname !== "undefined") {
         console.log("Not necessary to update subs.");
       }
 
-      planTextUpdate=false;
-      oldText="";
+      planTextUpdate = false;
+      oldText = "";
     });
 
     file_text.addEventListener("input", () => {
       console.log("Plan to update subs.");
-      planTextUpdate=true;
+      planTextUpdate = true;
     });
   }
 
@@ -199,65 +204,83 @@ function exit_on_esc() {
 }
 
 // Return a time code in the form hh:mm:ss,sss or hh:mm:ss.sss in milliseconds
-function tc_to_ms(tc)
-{
-  const re2=/(\d+):(\d+):(\d+),(\d+)/;
-  var m=tc.match(re2);
-  var ms=0;
-  if (m.length >= 2) ms=parseInt(m[1])*3600;
-  if (m.length >= 3) ms+=parseInt(m[2])*60;
-  if (m.length >= 4) ms+=parseInt(m[3]);
-  ms*=1000;
-  if (m.length >= 5) ms+=parseInt(m[4]);
+function tc_to_ms(tc) {
+  const re2 = /(\d+):(\d+):(\d+),(\d+)/;
+  var m = tc.match(re2);
+  var ms = 0;
+  if (m.length >= 2) ms = parseInt(m[1]) * 3600;
+  if (m.length >= 3) ms += parseInt(m[2]) * 60;
+  if (m.length >= 4) ms += parseInt(m[3]);
+  ms *= 1000;
+  if (m.length >= 5) ms += parseInt(m[4]);
   return ms;
 }
 
 // Millisecond to time code correct for integer number up to 100 hours (3 600 000 000)
-function ms_to_tc(ms)
-{
+function ms_to_tc(ms) {
   // Pad number with 0 to obtain a string of 9 characters long
-  var s=ms.toString();
+  var s = ms.toString();
   if (s.length < 9)
-    s=ms.toString().padStart(9, '0')
+    s = ms.toString().padStart(9, '0')
 
   console.log(s);
-  const re=/(\d\d)(\d\d)(\d\d)(\d\d\d)/;
-  var m=s.match(re);
+  const re = /(\d\d)(\d\d)(\d\d)(\d\d\d)/;
+  var m = s.match(re);
   //console.log(m[1]+':'+m[2]+':'+m[3]+','+m[4]);
-  var tc=m[1]/3600+':'+m[2]/60+':'+m[3]+','+m[4];
+  var tc = m[1] / 3600 + ':' + m[2] / 60 + ':' + m[3] + ',' + m[4];
 
   return tc;
 }
 
 
-String.prototype.count_char_occurrence = function(o='\n') {
-  return [...this].reduce((n, c) => c === o ? ++n:n, 0);
+String.prototype.count_char_occurrence = function(o = '\n') {
+  return [...this].reduce((n, c) => c === o ? ++n : n, 0);
 }
 
-String.prototype.count_lines = function(c='\n') {
+String.prototype.count_lines = function(c = '\n') {
   return this.count_char_occurrence();
 }
 
-String.prototype.remove_last_lines = function(n=1) {
-  var s=this;
-  for (i=0; i < n+1; i++) {
-    s=s.substring(0, s.lastIndexOf("\n"));
+String.prototype.remove_last_lines = function(n = 1) {
+  var s = this;
+  for (i = 0; i < n + 1; i++) {
+    s = s.substring(0, s.lastIndexOf("\n"));
+  }
+
+  return s;
+}
+
+String.prototype.remove_last_empty_lines = function() {
+  var s = this,
+    l;
+  var p;
+  for (;;) {
+    p = s.lastIndexOf("\n");
+    if (p == -1) break;
+    l = s.substring(p).trim();
+    if (l.length === 0) {
+      console.log(`Removing [${l}] after pos ${p}`);
+      s = s.substring(0, p);
+    } else break;
+    console.log("rem 1line");
   }
 
   return s;
 }
 
 // Analyze a string as subtitles in subrip format and return the corresponding json structured array
-String.prototype.to_subtitles = function() {//return;
-  var lineNumMaxWidth=this.count_lines().toString().length;
+String.prototype.to_subtitles = function() { //return;
+  var lineNumMaxWidth = this.count_lines().toString().length;
 
   const re = /^\s*(\d+:\d+:\d+,\d+)[^\S\n]+-->[^\S\n]+(\d+:\d+:\d+,\d+)((?:\n(?!\d+:\d+:\d+,\d+\b|\n+\d+$).*)*)/gm;
   var m = this.matchAll(re);
 
-  let nsubs = 0, nlines=1;
+  let nsubs = 0,
+    nlines = 1;
   var sub_arr = [];
 
-  var correctSubText="", correctSubLines="";
+  var correctSubText = "",
+    correctSubLines = "";
   for (const sub of m) {
     //console.log("processing line "+nlines);
     if (sub.length === 4) {
@@ -271,37 +294,38 @@ String.prototype.to_subtitles = function() {//return;
         "text": sub[3].trim("\n").trim("\r")
       });
 
-      var nline=3+sub[3].count_lines();
-      for (var n=nlines; n < nlines+nline; n++) {
-        correctSubLines+=n.toString().padStart(lineNumMaxWidth, ' ')+'\n';
+      var nline = 3 + sub[3].count_lines();
+      for (var n = nlines; n < nlines + nline; n++) {
+        correctSubLines += n.toString().padStart(lineNumMaxWidth, ' ') + '\n';
       }
-      nlines+=nline;
-      correctSubText+=(nsubs+1).toString()+'\n';
-      correctSubText+=sub[1]+ " --> " + sub[2];
-      correctSubText+=sub[3]+'\n\n';
+      nlines += nline;
+      correctSubText += (nsubs + 1).toString() + '\n';
+      correctSubText += sub[1] + " --> " + sub[2];
+      correctSubText += sub[3] + '\n\n';
       nsubs++;
     } else console.log(`{ "error": "Issue with subtitle number ${nsubs} (line: ${line})" }`);
   }
 
   // Remove last 2 lines of correctSubLines
-  correctSubLines=correctSubLines.remove_last_lines(2);
-  nlines-=3;
+  console.log("to_sub rem lines");
+  correctSubText = correctSubText.remove_last_empty_lines();
+  nlines = correctSubText.count_lines() + 1;
 
-  file_lines.innerHTML=correctSubLines;
-  file_lines.style.height=nlines.toString()+"em";
+  file_lines.innerHTML = correctSubLines;
+  file_lines.style.height = nlines.toString() + "em";
   //file_lines.style.width="2em";
-  file_text.innerText=correctSubText;
-  file_text.style.height=nlines.toString()+"em";
+  file_text.innerText = correctSubText;
+  file_text.style.height = nlines.toString() + "em";
   fatc = sub_arr[0].appearance_timecode;
   latc = sub_arr.at(-1).appearance_timecode;
   ldtc = sub_arr.at(-1).disappearance_timecode;
-  ldms=tc_to_ms(ldtc);
-  fams=tc_to_ms(fatc);
-  dur_ms=ldms-fams;
-  dur_tc=new Date(dur_ms).toISOString().slice(11, 23);
+  ldms = tc_to_ms(ldtc);
+  fams = tc_to_ms(fatc);
+  dur_ms = ldms - fams;
+  dur_tc = new Date(dur_ms).toISOString().slice(11, 23);
   //console.log(` ${ldtc}(${ldms})\n-${fatc}(${fams})\n-------------\n=${dur_tc}(${dur_ms})`);
 
-  var subs={
+  var subs = {
     "first_appearance_timecode": fatc,
     "last_appearance_timecode": latc,
     "last_disappearance_timecode": ldtc,

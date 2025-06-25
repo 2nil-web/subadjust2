@@ -13,28 +13,21 @@
 
 <body>
   <div class="topnav">
-    Input file
-    <textarea readonly id="filepath" style="overflow-x:auto; resize:none;white-space: nowrap;"></textarea>
-  </div>
-
-  <div class="topnav">
     <a onclick="open_file()">Open</a>
     <a onclick="reload_file()">Reload</a>
-    <a onclick="">Save</a>
-    <a onclick="">Save As</a>
-    <a style="position: absolute; right:7px;" onclick="about()">About</a>
-  </div>
-
-  <div class="topnav">
-    <a onclick="">Cut</a>
-    <a onclick="">Paste</a>
-    <a onclick="" style="margin-left:40px">(Re)index</a>
-    <input id="index" type="number" step="1" value="" />
+    <a onclick="save_file()">Save</a>
+    <a onclick="saveas_file()">Save As</a>
+    <a style="position: absolute; right:56px;" onclick="about()">About</a>
     <a style="position: absolute; right:7px;" onclick="app.exit()">Quit</a>
   </div>
 
+  <fieldset>
+    <legend>Input file</legend>
+    <textarea readonly id="filepath"></textarea>
+  </fieldset>
+
   <div class="topnav">
-    <fieldset style="width: 340px">
+    <fieldset style="width: 322px">
       <legend align="center">Subtitles Adjustment by ...</legend>
       <table>
         <tr>
@@ -44,7 +37,7 @@
               <table>
                 <tr>
                   <td>
-                    <label for="start_time">Start:</label>
+                    <label for="start_time">Start</label>
                   </td>
                   <td>
                     <input id="start_time" type="time" step="0.001" value="00:00:00" />
@@ -53,7 +46,7 @@
                 </tr>
                 <tr>
                   <td>
-                    <label for="end_time">End:</label>
+                    <label for="end_time">End</label>
                   </td>
                   <td>
                     <input id="end_time" type="time" step="0.001" value="01:01:01" />
@@ -64,12 +57,12 @@
             </fieldset>
           </td>
           <td>
-            <fieldset style="width: 120px">
+            <fieldset style="width: 80px">
               <legend>Coefficient</legend>
               <table>
                 <tr>
                   <td>
-                    <label for="time_shift">Shift:</label>
+                    <label for="time_shift">Shift&nbsp;(s)</label>
                   </td>
                   <td>
                     <input id="time_shift" type="number" step="0.01" value="" />
@@ -78,34 +71,46 @@
                 </tr>
                 <tr>
                   <td>
-                    <label for="time_factor">Factor:</label>
+                    <label for="time_factor">Factor&nbsp;(>0)</label>
                   </td>
                   <td>
                     <input id="time_factor" type="number" step="0.01" value="" />
                   </td>
-                  <td>
                 </tr>
               </table>
             </fieldset>
           </td>
         </tr>
       </table>
-      <a onclick="" style="margin-left:130px">Adjust</a>
+      <a onclick="" style="margin-left:146px">Adjust</a>
     </fieldset>
   </div>
   <div class="topnav">
-    <fieldset style="width: 382px">
-      <legend>Go to</legend>
-      <a id="toTop">Start</a>
-      <a id="toMiddleLine">Middle line</a>
-      <a id="toMiddleSub">Middle sub</a>
-      <a id="toMiddleTime">Middle time</a>
-      <a id="toBottom">End</a>
+    <fieldset style="width: 322px">
+      <legend>Go to ...</legend>
+      <table>
+        <tr>
+          <td>
+            <a id="toTop">Start</a>
+          </td>
+          <td>
+            <fieldset>
+              <legend align="center">Middle ...</legend>
+              <a id="toMiddleLine" style="margin-left:20px">Line</a>
+              <a id="toMiddleSub">Sub</a>
+              <a id="toMiddleTime">Time</a>
+            </fieldset>
+          </td>
+          <td>
+            <a id="toBottom">End</a>
+        </tr>
+      </table>
     </fieldset>
   </div>
-  <div id="file_container" class="file_container" >
-  <div autofocus id="file_lines" class="file_lines" spellCheck="false"></div>
-  <div autofocus id="file_text" class="file_text" contentEditable=true spellCheck="false"></div>
+  <div id="file_container">
+    <div autofocus id="file_lines" spellCheck="false"></div>
+    <div autofocus id="file_text" contentEditable=true spellCheck="false"></div>
   </div>
 </body>
+
 </html>
