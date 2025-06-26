@@ -124,6 +124,19 @@ if (typeof app.sysname !== "undefined") {
   var args = app.args_line.split(',');
   //for (var i = 0; i < args.length; i++) { console.log(`args[${i}]=${args[i]}`); }
 
+  function setCaret(elt) {
+    var nl = elt.target.value;
+    const range = document.createRange();
+    const selection = window.getSelection();
+
+    if (nl < subs.line_number) {
+      range.setStart(file_text.childNodes[nl], 0);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } else elt.target.value = subs.line_number;
+  }
+
   async function do_load() {
     document.addEventListener("keyup", exit_on_esc);
     await app.set_size(400, 600, 1);
@@ -148,9 +161,9 @@ if (typeof app.sysname !== "undefined") {
     toMiddleLine.addEventListener("click", () => {
       const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
       const ln = parseInt((file_container.scrollHeight / 2)) - lh;
-      //console.log(`Middle line number: ${parseInt(ln / lh)+1}, file_container.scrollHeight: ${file_container.scrollHeight}`);
       file_container.scrollTop = ln;
-      current_line_number.value = 1 + ln / lh;
+      console.log(`Middle line number: ${parseInt(ln / lh)+1}, file_container.scrollHeight: ${file_container.scrollHeight}, file_container.scrollTop = ${ln}`);
+      current_line_number.value = 1 + parseInt(ln / lh);
     });
 
     toMiddleSub.addEventListener("click", () => {
@@ -188,20 +201,25 @@ if (typeof app.sysname !== "undefined") {
       }
 
       mid_tc = new Date(mid_ms).toISOString().slice(11, 23);
-      //console.log(`mid_ms: ${mid_ms}, mid_tc: ${mid_tc}, closest_tc: ${closest_tc}, closest_line: ${closest_line}`);
       const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
       file_container.scrollTop = (closest_line + 1) * lh;
       current_line_number.value = closest_line + 2;
+      //console.log(`mid_ms: ${mid_ms}, mid_tc: ${mid_tc}, closest_tc: ${closest_tc}, closest_line: ${closest_line}`);
     });
 
-    current_line_number.addEventListener("change", (e) => {
+    current_line_number.addEventListener("input", (e) => {
       const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
-      console.log(`e.target.value: ${e.target.value}, lh: ${lh}`);
+      //console.log(`e.target.value: ${e.target.value}, lh: ${lh}, file_container.scrollTop: ${(e.target.value - 1) * lh}`);
       file_container.scrollTop = (e.target.value - 1) * lh;
+      setCaret(e);
+      e.target.focus();
+    });
+
+    current_line_number.addEventListener("focusout", (e) => {
+      setCaret(e);
     });
 
     toBottom.addEventListener("click", () => {
-      const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
       file_container.scrollTop = file_container.scrollHeight;
       current_line_number.value = subs.line_number;
     });
