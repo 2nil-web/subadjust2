@@ -26,6 +26,11 @@ async function save_file() {
   await fs.write(filepath.value, file_text.innerText);
 }
 
+async function saveas_file() {
+  var file = (await gui.savedlg());
+  if (file.length > 0) await fs.write(file, file_text.innerText);
+}
+
 async function load_subs(subText) {
   subs = subText.to_subtitles();
   start_time.value = subs.first_appearance_timecode.replace(/,/, '.');
