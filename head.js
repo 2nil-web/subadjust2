@@ -18,8 +18,6 @@ function basename(path) {
   return path.split(/[\\/]/).pop();
 }
 
-var inc = 0;
-var subs;
 
 // *fs.write: at least 1 parameter, truncate and write to the file who's name is provided as the first parameter, the content of all the following parameters, return true if the operation was OK, else false.
 async function save_file() {
@@ -29,13 +27,6 @@ async function save_file() {
 async function saveas_file() {
   var file = (await gui.savedlg());
   if (file.length > 0) await fs.write(file, file_text.innerText);
-}
-
-async function load_subs(subText) {
-  subs = subText.to_subtitles();
-  start_time.value = subs.first_appearance_timecode.replace(/,/, '.');
-  end_time.value = subs.last_appearance_timecode.replace(/,/, '.');
-  console.log(subs);
 }
 
 async function read_file(filename) {
@@ -48,7 +39,7 @@ async function read_file(filename) {
       app.set_title(document.title + " - " + basename(filename));
       filepath.value = filename;
       subText = await fs.read(filename);
-      load_subs(subText);
+      subText.to_subtitles();
     } else {
       gui.msgbox(`File [${filename}] does not exists.`);
     }
@@ -62,7 +53,7 @@ async function reload_file() {
   if (newSubText == oldSubText) return;
 
   if (await gui.msgbox("Your actual modifications will be lost, is that OK ?", 2)) {
-    load_subs(newSubText);
+    subText.to_subtitles();
   }
 }
 
@@ -73,6 +64,19 @@ async function open_file() {
   read_file(await gui.opendlg());
 }
 
+var current_line_number;
+
+function getElements() {
+  //console.log(`typeof current_line_number: ${typeof current_line_number}`);
+
+  if (typeof current_line_number === "undefined") {
+    current_line_number = document.getElementById("current_line_number");
+    //console.log(`current_line_number: ${current_line_number.value}`);
+  }
+}
+
+var inc = 0;
+var subs;
 if (typeof app.sysname !== "undefined") {
   /*
   for (const key of Object.keys(localStorage))
@@ -143,6 +147,7 @@ if (typeof app.sysname !== "undefined") {
   }
 
   async function do_load() {
+    getElements();
     document.addEventListener("keyup", exit_on_esc);
     await app.set_size(400, 600, 1);
     if (app.x < 0) correcX = 0;
@@ -158,20 +163,35 @@ if (typeof app.sysname !== "undefined") {
       read_file(args[1]);
     }
 
-    toTop.addEventListener("click", () => {
+    current_line_number.addEventListener("input", (e) => {
+      const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
+      //console.log(`e.target.value: ${e.target.value}, lh: ${lh}, file_container.scrollTop: ${(e.target.value - 1) * lh}`);
+      file_container.scrollTop = (e.target.value - 1) * lh;
+      setCaret(e);
+      e.target.focus();
+    });
+
+    current_line_number.addEventListener("focusout", (e) => {
+      setCaret(e);
+    });
+
+    toTop.addEventListener("click", (e) => {
+      getElements();
       file_container.scrollTop = 0;
-      current_line_number.value = 1;
+      current_line_number.value = "1";
     });
 
     toMiddleLine.addEventListener("click", () => {
+      getElements();
       const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
       const ln = parseInt((file_container.scrollHeight / 2)) - lh;
       file_container.scrollTop = ln;
-      console.log(`Middle line number: ${parseInt(ln / lh)+1}, file_container.scrollHeight: ${file_container.scrollHeight}, file_container.scrollTop = ${ln}`);
+      //console.log(`Middle line number: ${parseInt(ln / lh)+1}, file_container.scrollHeight: ${file_container.scrollHeight}, file_container.scrollTop = ${ln}`);
       current_line_number.value = 1 + parseInt(ln / lh);
     });
 
     toMiddleSub.addEventListener("click", () => {
+      getElements();
       var subn = parseInt(subs.sub_number / 2);
       const re = new RegExp('\n' + subn + '\n');
       var pos = file_text.innerText.search(re);
@@ -187,6 +207,7 @@ if (typeof app.sysname !== "undefined") {
     });
 
     toMiddleTime.addEventListener("click", () => {
+      getElements();
       var tc = subs.last_appearance_timecode;
       var closest_ms = tc_to_ms(tc);
       var mid_ms = closest_ms / 2;
@@ -212,19 +233,8 @@ if (typeof app.sysname !== "undefined") {
       //console.log(`mid_ms: ${mid_ms}, mid_tc: ${mid_tc}, closest_tc: ${closest_tc}, closest_line: ${closest_line}`);
     });
 
-    current_line_number.addEventListener("input", (e) => {
-      const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
-      //console.log(`e.target.value: ${e.target.value}, lh: ${lh}, file_container.scrollTop: ${(e.target.value - 1) * lh}`);
-      file_container.scrollTop = (e.target.value - 1) * lh;
-      setCaret(e);
-      e.target.focus();
-    });
-
-    current_line_number.addEventListener("focusout", (e) => {
-      setCaret(e);
-    });
-
     toBottom.addEventListener("click", () => {
+      getElements();
       file_container.scrollTop = file_container.scrollHeight;
       current_line_number.value = subs.line_number;
     });
@@ -382,7 +392,7 @@ String.prototype.to_subtitles = function() { //return;
   dur_tc = new Date(dur_ms).toISOString().slice(11, 23);
   //console.log(` ${ldtc}(${ldms})\n-${fatc}(${fams})\n-------------\n=${dur_tc}(${dur_ms})`);
 
-  var subs = {
+  subs = {
     "first_appearance_timecode": fatc,
     "last_appearance_timecode": latc,
     "last_disappearance_timecode": ldtc,
@@ -393,5 +403,10 @@ String.prototype.to_subtitles = function() { //return;
     "subtitles": sub_arr
   };
 
+  start_time.value = subs.first_appearance_timecode.replace(/,/, '.');
+  end_time.value = subs.last_appearance_timecode.replace(/,/, '.');
+  current_line_number = subs.nlines;
+
+  console.log(subs);
   return subs;
 };

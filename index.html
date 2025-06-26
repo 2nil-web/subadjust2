@@ -8,8 +8,6 @@
   <link rel="icon" type="image/x-icon" href="app.svg">
   <link rel="stylesheet" type="text/css" href="style.css">
   <script type="text/javascript" src="head.js"></script>
-  <style>
-  </style>
 
 <body>
   <div class="topnav">
@@ -20,12 +18,10 @@
     <a style="position: absolute; right:56px;" onclick="about()">About</a>
     <a style="position: absolute; right:7px;" onclick="app.exit()">Quit</a>
   </div>
-
   <fieldset>
     <legend>Input file</legend>
     <textarea readonly id="filepath"></textarea>
   </fieldset>
-
   <div class="topnav">
     <fieldset style="width: 322px">
       <legend align="center">Subtitles Adjustment by ...</legend>
@@ -91,18 +87,18 @@
       <table>
         <tr>
           <td>
-            <a id="toTop">Start</a>
+            <a id="toTop" accesskey="s"><u>s</u>tart</a>
           </td>
           <td>
             <fieldset>
               <legend align="center">Middle ...</legend>
-              <a id="toMiddleLine" style="margin-left:20px">Line</a>
-              <a id="toMiddleSub">Sub</a>
-              <a id="toMiddleTime">Time</a>
+              <a id="toMiddleLine" style="margin-left:20px" accesskey="L"><u>l</u>ine</a>
+              <a id="toMiddleSub" accesskey="u">s<u>u</u>b</a>
+              <a id="toMiddleTime" accesskey="t"><u>t</u>ime</a>
             </fieldset>
           </td>
           <td>
-            <a id="toBottom">End</a>
+            <a id="toBottom" accesskey="e">end</a>
         </tr>
         <tr>
           <td>
