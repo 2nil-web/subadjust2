@@ -11,11 +11,12 @@
 
 <body>
   <div class="topnav">
-    <a onclick="open_file()">Open</a>
-    <a onclick="reload_file()">Reload</a>
     <a onclick="save_file()">Save</a>
+    <a onclick="open_file()">Open</a>
     <a onclick="saveas_file()">Save As</a>
-    <a style="position: absolute; right:56px;" onclick="about()">About</a>
+    <a onclick="reload_file()">Reload</a>
+    <a title="Add another subtitles after the current one and restructure the whole line numbers and time stamps accordingly.">Concatenate</a>
+    <a style="position: absolute; right:44px;" onclick="about()">About</a>
     <a style="position: absolute; right:7px;" onclick="app.exit()">Quit</a>
   </div>
   <fieldset>
@@ -90,7 +91,7 @@
             <a id="toTop" accesskey="s"><u>s</u>tart</a>
           </td>
           <td>
-            <fieldset>
+            <fieldset style="width:140px">
               <legend align="center">Middle ...</legend>
               <a id="toMiddleLine" style="margin-left:20px" accesskey="L"><u>l</u>ine</a>
               <a id="toMiddleSub" accesskey="u">s<u>u</u>b</a>
@@ -102,10 +103,10 @@
         </tr>
         <tr>
           <td>
-            <label for="current_line_number">Line number</label>
+            <label for="current_line_number">Line</label>
           </td>
           <td>
-            <input id="current_line_number" type="number" step="1" value="1" min="1" max="999999" />
+            <input id="current_line_number" type="number" step="1" value="1" min="1" max="999999" />&nbsp;
           </td>
         </tr>
       </table>

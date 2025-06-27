@@ -38,8 +38,8 @@ async function read_file(filename) {
     if (await fs.exists(filename)) {
       app.set_title(document.title + " - " + basename(filename));
       filepath.value = filename;
-      subText = await fs.read(filename);
-      subText.to_subtitles();
+      var subText = await fs.read(filename);
+      subText.parseSubtitles();
     } else {
       gui.msgbox(`File [${filename}] does not exists.`);
     }
@@ -50,10 +50,8 @@ async function reload_file() {
   var oldSubText = file_text.innerText;
   var newSubText = await fs.read(filepath.value);
 
-  if (newSubText == oldSubText) return;
-
-  if (await gui.msgbox("Your actual modifications will be lost, is that OK ?", 2)) {
-    subText.to_subtitles();
+  if (newSubText != oldSubText && (await gui.msgbox("Your actual modifications will be lost, is that OK ?", 2))) {
+    newSubText.parseSubtitles();
   }
 }
 
@@ -75,8 +73,8 @@ function getElements() {
   }
 }
 
-var inc = 0;
-var subs;
+var inc = 0; // Used to juxtapose multiple instance of SubAdjust
+var subs; // Contains the structured result of a parsed subtitle
 if (typeof app.sysname !== "undefined") {
   /*
   for (const key of Object.keys(localStorage))
@@ -163,6 +161,14 @@ if (typeof app.sysname !== "undefined") {
       read_file(args[1]);
     }
 
+    start_time.addEventListener("change", (e) => {
+      console.log(`start_time.value ${e.target.value}`);
+    });
+
+    end_time.addEventListener("change", (e) => {
+      console.log(`end_time.value ${e.target.value}`);
+    });
+
     current_line_number.addEventListener("input", (e) => {
       const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
       //console.log(`e.target.value: ${e.target.value}, lh: ${lh}, file_container.scrollTop: ${(e.target.value - 1) * lh}`);
@@ -247,7 +253,7 @@ if (typeof app.sysname !== "undefined") {
     file_text.addEventListener("focusout", () => {
       if (planTextUpdate && oldText !== file_text.innerText) {
         console.log("Effective subs updating.");
-        file_text.innerText.to_subtitles();
+        file_text.innerText.parseSubtitles();
       } else {
         //console.log("Not necessary to update subs.");
       }
@@ -336,7 +342,7 @@ String.prototype.remove_last_empty_lines = function() {
 }
 
 // Analyze a string as subtitles in subrip format and return the corresponding json structured array
-String.prototype.to_subtitles = function() { //return;
+String.prototype.parseSubtitles = function() {
   var lineNumMaxWidth = this.count_lines().toString().length;
 
   const re = /^\s*(\d+:\d+:\d+,\d+)[^\S\n]+-->[^\S\n]+(\d+:\d+:\d+,\d+)((?:\n(?!\d+:\d+:\d+,\d+\b|\n+\d+$).*)*)/gm;
