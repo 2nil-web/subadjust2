@@ -162,11 +162,11 @@ if (typeof app.sysname !== "undefined") {
     }
 
     start_time.addEventListener("change", (e) => {
-      console.log(`start_time.value ${e.target.value}`);
+      coeffAdjust();
     });
 
     end_time.addEventListener("change", (e) => {
-      console.log(`end_time.value ${e.target.value}`);
+      coeffAdjust();
     });
 
     current_line_number.addEventListener("input", (e) => {
@@ -279,8 +279,11 @@ function exit_on_esc() {
 
 // Return a time code in the form hh:mm:ss,sss or hh:mm:ss.sss in milliseconds
 function tc_to_ms(tc) {
+  const re1 = /(\d+):(\d+):(\d+).(\d+)/;
   const re2 = /(\d+):(\d+):(\d+),(\d+)/;
-  var m = tc.match(re2);
+  var m = tc.match(re1);
+  if (m === null) tc.match(re2);
+
   var ms = 0;
   if (m.length >= 2) ms = parseInt(m[1]) * 3600;
   if (m.length >= 3) ms += parseInt(m[2]) * 60;
@@ -413,6 +416,42 @@ String.prototype.parseSubtitles = function() {
   end_time.value = subs.last_appearance_timecode.replace(/,/, '.');
   current_line_number = subs.nlines;
 
+  coeffAdjust();
+
   console.log(subs);
   return subs;
 };
+
+function coeffAdjust(from_time = true) {
+  console.log("subAdjust");
+  var old_start_ms = tc_to_ms(subs.first_appearance_timecode);
+  var old_end_ms = tc_to_ms(subs.last_appearance_timecode);
+  var new_start_ms = tc_to_ms(start_time.value);
+  var new_end_ms = tc_to_ms(end_time.value);
+
+  var start_offset = parseFloat((new_start_ms - old_start_ms) / 1000);
+  var new_dur_ms = new_end_ms - new_start_ms;
+  var old_dur_ms = old_end_ms - old_start_ms;
+  var dur_factor = parseFloat(new_dur_ms / old_dur_ms);
+
+  if (from_time) offset.value = start_offset;
+  else start_offset = parseFloat(offset.value);
+  if (from_time) factor.value = dur_factor;
+  else dur_factor = parseFloat(factor.value);
+
+  console.log(`OLD start_time: ${subs.first_appearance_timecode}, end_time: ${subs.last_appearance_timecode}, start_ms: ${old_start_ms}, end_ms: ${old_end_ms}`);
+  console.log(`NEW start_time: ${start_time.value}, end_time: ${end_time.value}, start_ms: ${new_start_ms}, end_ms: ${new_end_ms}`);
+  console.log(`start_offset: ${start_offset}, new_dur_ms: ${new_dur_ms}, old_dur_ms: ${old_dur_ms}, dur_factor:${dur_factor}`);
+}
+
+function subAdjust() {
+  coeffAdjust();
+  /*for(sub of subs.subtitles) {
+    console.log(`
+appearance_timecode: ${sub.appearance_timecode},
+disappearance_timecode: ${sub.disappearance_timecode},
+appearance_ms: ${sub.appearance_ms},
+disappearance_ms: ${sub.disappearance_ms},
+    `);
+  }*/
+}
