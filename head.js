@@ -166,7 +166,19 @@ if (typeof app.sysname !== "undefined") {
     });
 
     end_time.addEventListener("change", (e) => {
+      //console.log(e);
       coeffAdjust();
+    });
+
+    offset.addEventListener("change", (e) => {
+      //console.log(e.srcElement.value);
+      //console.log(e);
+      timeAdjust();
+    });
+
+    factor.addEventListener("change", (e) => {
+      //console.log(e);
+      timeAdjust();
     });
 
     current_line_number.addEventListener("input", (e) => {
@@ -214,17 +226,20 @@ if (typeof app.sysname !== "undefined") {
 
     toMiddleTime.addEventListener("click", () => {
       getElements();
-      var tc = subs.last_appearance_tc;
-      var closest_ms = tc_to_ms(tc);
-      var mid_ms = closest_ms / 2;
-      var closest_line=0, nlines = 0;
+      var closest_tc;
+      var closest_ms = tc_to_ms(subs.last_appearance_tc);
+      var mid_ms = (closest_ms + tc_to_ms(subs.first_appearance_tc)) / 2;
+      var closest_line = 0,
+        nlines = 0;
+      console.log(`AVT mid_ms: ${mid_ms}`);
 
       for (sub of subs.subtitles) {
-        var diff_ms = mid_ms - tc_to_ms(sub.appearance_tc);
+        var curr_ms = tc_to_ms(sub.appearance_tc);
+        var diff_ms = mid_ms - curr_ms;
         if (diff_ms < 0) break;
 
         if (closest_ms > diff_ms) {
-          closest_ms = diff_ms;
+          closest_ms = curr_ms;
           closest_tc = sub.appearance_tc;
           closest_line = nlines;
         }
@@ -232,11 +247,12 @@ if (typeof app.sysname !== "undefined") {
         nlines += (4 + sub.text.count_lines());
       }
 
-      mid_tc = new Date(mid_ms).toISOString().slice(11, 23);
       const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
       file_container.scrollTop = (closest_line + 1) * lh;
       current_line_number.value = closest_line + 2;
-      //console.log(`mid_ms: ${mid_ms}, mid_tc: ${mid_tc}, closest_tc: ${closest_tc}, closest_line: ${closest_line}`);
+
+      console.log(`APR closest_tc: ${closest_tc}, closest_ms: ${closest_ms}, closest_line: ${closest_line}`);
+      console.log("");
     });
 
     toBottom.addEventListener("click", () => {
@@ -280,7 +296,7 @@ function exit_on_esc() {
 // Return a time code in the form hh:mm:ss,sss or hh:mm:ss.sss in milliseconds
 function tc_to_ms(tc) {
   // 
-  tc=tc.replace(/,/, ".");
+  tc = tc.replace(/,/, ".");
   const re = /(\d+):(\d+):(\d+)\.(\d+)/;
   var m = tc.match(re);
 
@@ -293,7 +309,7 @@ function tc_to_ms(tc) {
   return ms;
 }
 
-/* Replaced by new Date(dur_ms).toISOString().slice(11, 23)
+/* Replaced by new Date(ms).toISOString().slice(11, 23)
  * Millisecond to time code correct for integer number up to 100 hours (3 600 000 000)
 function ms_to_tc(ms) {
   // Pad number with 0 to obtain a string of 9 characters long
@@ -419,45 +435,48 @@ String.prototype.parseSubtitles = function() {
   return subs;
 };
 
+// Compute the coefficients (offset and factor) from the times (start and end)
 function coeffAdjust(from_time = true) {
-  //console.log("subAdjust");
+  //console.log(`Start coeffAdjust - start_time:${start_time.value}, end_time:${end_time.value}, offset:${offset.value}, factor:${factor.value}`);
   var old_start_ms = tc_to_ms(subs.first_appearance_tc);
   var old_end_ms = tc_to_ms(subs.last_appearance_tc);
   var new_start_ms = tc_to_ms(start_time.value);
   var new_end_ms = tc_to_ms(end_time.value);
-
-  var start_offset = parseFloat((new_start_ms - old_start_ms) / 1000);
+  offset.value = parseFloat((new_start_ms - old_start_ms) / 1000);
   var new_dur_ms = new_end_ms - new_start_ms;
   var old_dur_ms = old_end_ms - old_start_ms;
-  var dur_factor = parseFloat(new_dur_ms / old_dur_ms);
-
-  if (from_time) offset.value = start_offset;
-  else start_offset = parseFloat(offset.value);
-  if (from_time) factor.value = dur_factor;
-  else dur_factor = parseFloat(factor.value);
-
-  //console.log(`OLD start_time: ${subs.first_appearance_tc}, end_time: ${subs.last_appearance_tc}, start_ms: ${old_start_ms}, end_ms: ${old_end_ms}`);
-  //console.log(`NEW start_time: ${start_time.value}, end_time: ${end_time.value}, start_ms: ${new_start_ms}, end_ms: ${new_end_ms}`);
-  //console.log(`start_offset: ${start_offset}, new_dur_ms: ${new_dur_ms}, old_dur_ms: ${old_dur_ms}, dur_factor:${dur_factor}`);
+  factor.value = parseFloat(new_dur_ms / old_dur_ms);
+  //console.log(`End - coeffAdjust - start_time:${start_time.value}, end_time:${end_time.value}, offset:${offset.value}, factor:${factor.value}`);
 }
 
-var adj_log=false;
-function adj_tc(off, fac, old_tc, lab_tc="") 
-{
-  let old_ms=tc_to_ms(old_tc);
+// Compute the times (start and end) from coefficients (offset and factor)
+function timeAdjust() {
+  var old_start_ms = tc_to_ms(start_time.value);
+  var old_end_ms = tc_to_ms(end_time.value);
+  var offs_ms = offset.value * 1000;
+  //console.log(`Start timeAdjust - old_start_ms:${old_start_ms}, old_end_ms:${old_end_ms}, offset:${offs_ms}, factor:${factor.value}`);
+  start_time.value = new Date(old_start_ms + offs_ms).toISOString().slice(11, 23);
+  end_time.value = new Date(offs_ms + old_end_ms * factor.value).toISOString().slice(11, 23);
+  //console.log(`End - timeAdjust - start_time:${start_time.value}, end_time:${end_time.value}, offset:${offset.value}, factor:${factor.value}`);
+}
+
+var adj_log = false;
+
+function adj_tc(off, fac, old_tc, lab_tc = "") {
+  let old_ms = tc_to_ms(old_tc);
   if (lab_tc.length > 0 && adj_log) console.log(`AVT ADJ ${lab_tc}, ${old_tc} (${old_ms})`);
 
-  let new_ms=1000*off+old_ms*fac;
-  let new_tc=new Date(new_ms).toISOString().slice(11, 23);
+  let new_ms = 1000 * off + old_ms * fac;
+  let new_tc = new Date(new_ms).toISOString().slice(11, 23);
   if (lab_tc.length > 0 && adj_log) console.log(`APR ADJ ${lab_tc}, ${new_tc} (${new_ms})`);
   return new_tc;
 }
 
 function head_adj(off, fac, subs) {
-  subs.first_appearance_tc= adj_tc(off, fac, subs.first_appearance_tc, "first_appearance_tc");
-  subs.last_appearance_tc= adj_tc(off, fac, subs.last_appearance_tc, "last_appearance_tc");
-  subs.last_disappearance_tc= adj_tc(off, fac, subs.last_disappearance_tc, "last_disappearance_tc");
-  subs.duration_tc= adj_tc(off, fac, subs.duration_tc, "duration_tc");
+  subs.first_appearance_tc = adj_tc(off, fac, subs.first_appearance_tc, "first_appearance_tc");
+  subs.last_appearance_tc = adj_tc(off, fac, subs.last_appearance_tc, "last_appearance_tc");
+  subs.last_disappearance_tc = adj_tc(off, fac, subs.last_disappearance_tc, "last_disappearance_tc");
+  subs.duration_tc = adj_tc(off, fac, subs.duration_tc, "duration_tc");
 }
 
 function sub_adj(off, fac, sub) {
@@ -466,36 +485,40 @@ function sub_adj(off, fac, sub) {
 }
 
 function subAdjust() {
-  coeffAdjust();
-  //console.log(`offset: ${offset.value}, factor: ${factor.value}`);
-  let offs=parseFloat(offset.value);
-  let fact=parseFloat(factor.value);
-  //console.log(`offs: ${offs}, fact: ${fact}`);
+  for (i = 0; i < 3; i++) {
+    coeffAdjust();
+    //console.log(`offset: ${offset.value}, factor: ${factor.value}`);
+    let offs = parseFloat(offset.value);
+    let fact = parseFloat(factor.value);
+    //console.log(`offs: ${offs}, fact: ${fact}`);
 
-  head_adj(offs, fact, subs);
+    head_adj(offs, fact, subs);
 
-  var lines="", texts="";
-  let nsubs=1;
-  let nlines=0;
-  for(var sub of subs.subtitles) {
-    sub_adj(offs, fact, sub);
-    //console.log(`${sub.appearance_tc} --> ${sub.disappearance_tc}`);
-    lines+=`${nsubs}`;
-    texts+=`${nsubs}\n`;
-    texts+=`${sub.appearance_tc} --> ${sub.disappearance_tc}\n`;
-    texts+=`${sub.text}\n\n`;
-    nsubs++;
-    var nline = 3 + sub.text.count_lines();
-    for (var n = nlines; n < nlines + nline; n++) {
-      lines += n + '\n';
+    var lines = "",
+      texts = "";
+    let nsubs = 1;
+    let nlines = 0;
+    for (var sub of subs.subtitles) {
+      sub_adj(offs, fact, sub);
+      //console.log(`${sub.appearance_tc} --> ${sub.disappearance_tc}`);
+      lines += `${nsubs}`;
+      texts += `${nsubs}\n`;
+      texts += `${sub.appearance_tc} --> ${sub.disappearance_tc}\n`;
+      texts += `${sub.text}\n\n`;
+      nsubs++;
+      var nline = 4 + sub.text.count_lines();
+      for (var n = nlines; n < nlines + nline; n++) {
+        lines += n + '\n';
+      }
+      nlines += nline;
     }
-    nlines+=nline;
+
+    //file_lines.innerHTML = lines;
+    file_text.innerText = texts;
+
+    subs.sub_number = nsubs - 1;
+    subs.line_number = nlines - 1;
   }
 
-  //file_lines.innerHTML = lines;
-  file_text.innerText=texts;
-
-  subs.sub_number= nsubs;
-  subs.line_number=nlines;
   console.log(subs);
 }
