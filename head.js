@@ -214,18 +214,18 @@ if (typeof app.sysname !== "undefined") {
 
     toMiddleTime.addEventListener("click", () => {
       getElements();
-      var tc = subs.last_appearance_timecode;
+      var tc = subs.last_appearance_tc;
       var closest_ms = tc_to_ms(tc);
       var mid_ms = closest_ms / 2;
-      var nlines = 0;
+      var closest_line=0, nlines = 0;
 
       for (sub of subs.subtitles) {
-        var diff_ms = mid_ms - sub.appearance_ms;
+        var diff_ms = mid_ms - tc_to_ms(sub.appearance_tc);
         if (diff_ms < 0) break;
 
         if (closest_ms > diff_ms) {
           closest_ms = diff_ms;
-          closest_tc = sub.appearance_timecode;
+          closest_tc = sub.appearance_tc;
           closest_line = nlines;
         }
 
@@ -279,12 +279,12 @@ function exit_on_esc() {
 
 // Return a time code in the form hh:mm:ss,sss or hh:mm:ss.sss in milliseconds
 function tc_to_ms(tc) {
-  const re1 = /(\d+):(\d+):(\d+).(\d+)/;
-  const re2 = /(\d+):(\d+):(\d+),(\d+)/;
-  var m = tc.match(re1);
-  if (m === null) tc.match(re2);
+  // 
+  tc=tc.replace(/,/, ".");
+  const re = /(\d+):(\d+):(\d+)\.(\d+)/;
+  var m = tc.match(re);
 
-  var ms = 0;
+  let ms = 0;
   if (m.length >= 2) ms = parseInt(m[1]) * 3600;
   if (m.length >= 3) ms += parseInt(m[2]) * 60;
   if (m.length >= 4) ms += parseInt(m[3]);
@@ -293,7 +293,8 @@ function tc_to_ms(tc) {
   return ms;
 }
 
-// Millisecond to time code correct for integer number up to 100 hours (3 600 000 000)
+/* Replaced by new Date(dur_ms).toISOString().slice(11, 23)
+ * Millisecond to time code correct for integer number up to 100 hours (3 600 000 000)
 function ms_to_tc(ms) {
   // Pad number with 0 to obtain a string of 9 characters long
   var s = ms.toString();
@@ -307,7 +308,7 @@ function ms_to_tc(ms) {
   var tc = m[1] / 3600 + ':' + m[2] / 60 + ':' + m[3] + ',' + m[4];
 
   return tc;
-}
+}*/
 
 
 String.prototype.count_char_occurrence = function(o = '\n') {
@@ -360,19 +361,16 @@ String.prototype.parseSubtitles = function() {
   for (const sub of m) {
     //console.log("processing line "+nlines);
     if (sub.length === 4) {
-      var ams = tc_to_ms(sub[1]);
-      var dms = tc_to_ms(sub[2]);
       sub_arr.push({
-        "appearance_timecode": sub[1],
-        "disappearance_timecode": sub[2],
-        "appearance_ms": ams,
-        "disappearance_ms": dms,
+        "appearance_tc": sub[1],
+        "disappearance_tc": sub[2],
         "text": sub[3].trim("\n").trim("\r")
       });
 
       var nline = 3 + sub[3].count_lines();
       for (var n = nlines; n < nlines + nline; n++) {
-        correctSubLines += n.toString().padStart(lineNumMaxWidth, ' ') + '\n';
+        //correctSubLines += n.toString().padStart(lineNumMaxWidth, ' ') + '\n';
+        correctSubLines += n + '\n';
       }
       nlines += nline;
       correctSubText += (nsubs + 1).toString() + '\n';
@@ -392,9 +390,9 @@ String.prototype.parseSubtitles = function() {
   //file_lines.style.width="2em";
   file_text.innerText = correctSubText;
   file_text.style.height = nlines.toString() + "em";
-  fatc = sub_arr[0].appearance_timecode;
-  latc = sub_arr.at(-1).appearance_timecode;
-  ldtc = sub_arr.at(-1).disappearance_timecode;
+  fatc = sub_arr[0].appearance_tc;
+  latc = sub_arr.at(-1).appearance_tc;
+  ldtc = sub_arr.at(-1).disappearance_tc;
   ldms = tc_to_ms(ldtc);
   fams = tc_to_ms(fatc);
   dur_ms = ldms - fams;
@@ -402,18 +400,17 @@ String.prototype.parseSubtitles = function() {
   //console.log(` ${ldtc}(${ldms})\n-${fatc}(${fams})\n-------------\n=${dur_tc}(${dur_ms})`);
 
   subs = {
-    "first_appearance_timecode": fatc,
-    "last_appearance_timecode": latc,
-    "last_disappearance_timecode": ldtc,
-    "subs_duration_tc": dur_tc,
-    "subs_duration_ms": dur_ms,
+    "first_appearance_tc": fatc,
+    "last_appearance_tc": latc,
+    "last_disappearance_tc": ldtc,
+    "duration_tc": dur_tc,
     "sub_number": nsubs,
     "line_number": nlines,
     "subtitles": sub_arr
   };
 
-  start_time.value = subs.first_appearance_timecode.replace(/,/, '.');
-  end_time.value = subs.last_appearance_timecode.replace(/,/, '.');
+  start_time.value = subs.first_appearance_tc.replace(/,/, '.');
+  end_time.value = subs.last_appearance_tc.replace(/,/, '.');
   current_line_number = subs.nlines;
 
   coeffAdjust();
@@ -423,9 +420,9 @@ String.prototype.parseSubtitles = function() {
 };
 
 function coeffAdjust(from_time = true) {
-  console.log("subAdjust");
-  var old_start_ms = tc_to_ms(subs.first_appearance_timecode);
-  var old_end_ms = tc_to_ms(subs.last_appearance_timecode);
+  //console.log("subAdjust");
+  var old_start_ms = tc_to_ms(subs.first_appearance_tc);
+  var old_end_ms = tc_to_ms(subs.last_appearance_tc);
   var new_start_ms = tc_to_ms(start_time.value);
   var new_end_ms = tc_to_ms(end_time.value);
 
@@ -439,19 +436,66 @@ function coeffAdjust(from_time = true) {
   if (from_time) factor.value = dur_factor;
   else dur_factor = parseFloat(factor.value);
 
-  console.log(`OLD start_time: ${subs.first_appearance_timecode}, end_time: ${subs.last_appearance_timecode}, start_ms: ${old_start_ms}, end_ms: ${old_end_ms}`);
-  console.log(`NEW start_time: ${start_time.value}, end_time: ${end_time.value}, start_ms: ${new_start_ms}, end_ms: ${new_end_ms}`);
-  console.log(`start_offset: ${start_offset}, new_dur_ms: ${new_dur_ms}, old_dur_ms: ${old_dur_ms}, dur_factor:${dur_factor}`);
+  //console.log(`OLD start_time: ${subs.first_appearance_tc}, end_time: ${subs.last_appearance_tc}, start_ms: ${old_start_ms}, end_ms: ${old_end_ms}`);
+  //console.log(`NEW start_time: ${start_time.value}, end_time: ${end_time.value}, start_ms: ${new_start_ms}, end_ms: ${new_end_ms}`);
+  //console.log(`start_offset: ${start_offset}, new_dur_ms: ${new_dur_ms}, old_dur_ms: ${old_dur_ms}, dur_factor:${dur_factor}`);
+}
+
+var adj_log=false;
+function adj_tc(off, fac, old_tc, lab_tc="") 
+{
+  let old_ms=tc_to_ms(old_tc);
+  if (lab_tc.length > 0 && adj_log) console.log(`AVT ADJ ${lab_tc}, ${old_tc} (${old_ms})`);
+
+  let new_ms=1000*off+old_ms*fac;
+  let new_tc=new Date(new_ms).toISOString().slice(11, 23);
+  if (lab_tc.length > 0 && adj_log) console.log(`APR ADJ ${lab_tc}, ${new_tc} (${new_ms})`);
+  return new_tc;
+}
+
+function head_adj(off, fac, subs) {
+  subs.first_appearance_tc= adj_tc(off, fac, subs.first_appearance_tc, "first_appearance_tc");
+  subs.last_appearance_tc= adj_tc(off, fac, subs.last_appearance_tc, "last_appearance_tc");
+  subs.last_disappearance_tc= adj_tc(off, fac, subs.last_disappearance_tc, "last_disappearance_tc");
+  subs.duration_tc= adj_tc(off, fac, subs.duration_tc, "duration_tc");
+}
+
+function sub_adj(off, fac, sub) {
+  sub.appearance_tc = adj_tc(off, fac, sub.appearance_tc, "sub.appearance_tc");
+  sub.disappearance_tc = adj_tc(off, fac, sub.disappearance_tc, "sub.disappearance_tc");
 }
 
 function subAdjust() {
   coeffAdjust();
-  /*for(sub of subs.subtitles) {
-    console.log(`
-appearance_timecode: ${sub.appearance_timecode},
-disappearance_timecode: ${sub.disappearance_timecode},
-appearance_ms: ${sub.appearance_ms},
-disappearance_ms: ${sub.disappearance_ms},
-    `);
-  }*/
+  //console.log(`offset: ${offset.value}, factor: ${factor.value}`);
+  let offs=parseFloat(offset.value);
+  let fact=parseFloat(factor.value);
+  //console.log(`offs: ${offs}, fact: ${fact}`);
+
+  head_adj(offs, fact, subs);
+
+  var lines="", texts="";
+  let nsubs=1;
+  let nlines=0;
+  for(var sub of subs.subtitles) {
+    sub_adj(offs, fact, sub);
+    //console.log(`${sub.appearance_tc} --> ${sub.disappearance_tc}`);
+    lines+=`${nsubs}`;
+    texts+=`${nsubs}\n`;
+    texts+=`${sub.appearance_tc} --> ${sub.disappearance_tc}\n`;
+    texts+=`${sub.text}\n\n`;
+    nsubs++;
+    var nline = 3 + sub.text.count_lines();
+    for (var n = nlines; n < nlines + nline; n++) {
+      lines += n + '\n';
+    }
+    nlines+=nline;
+  }
+
+  //file_lines.innerHTML = lines;
+  file_text.innerText=texts;
+
+  subs.sub_number= nsubs;
+  subs.line_number=nlines;
+  console.log(subs);
 }
