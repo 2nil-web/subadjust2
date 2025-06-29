@@ -147,7 +147,7 @@ if (typeof app.sysname !== "undefined") {
   async function do_load() {
     getElements();
     document.addEventListener("keyup", exit_on_esc);
-    await app.set_size(400, 600, 1);
+    await app.set_size(430, 600, 1);
     if (app.x < 0) correcX = 0;
     else if (app.x > max_width) correcX = max_width;
     else correcX = app.x;
