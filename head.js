@@ -38,7 +38,9 @@ async function read_file(filename) {
     if (await fs.exists(filename)) {
       app.set_title(document.title + " - " + basename(filename));
       filepath.value = filename;
+      console.log(`Opening ${filename}`);
       var subText = await fs.read(filename);
+      //console.log(subText);
       subText.parseSubtitles();
     } else {
       gui.msgbox(`File [${filename}] does not exists.`);
