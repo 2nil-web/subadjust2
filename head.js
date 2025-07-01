@@ -38,7 +38,7 @@ async function read_file(filename) {
     if (await fs.exists(filename)) {
       app.set_title(document.title + " - " + basename(filename));
       filepath.value = filename;
-      console.log(`Opening ${filename}`);
+      //console.log(`Opening ${filename}`);
       var subText = await fs.read(filename);
       //console.log(subText);
       subText.parseSubtitles();
@@ -96,6 +96,8 @@ if (typeof app.sysname !== "undefined") {
   var max_width = 0,
     max_height = 0;
   (async () => {
+    console.log(typeof win);
+    if (typeof win !== "undefined") {
     // Get the max width and height of the working area
     mons = await win.monitors_info();
     //console.log(`Monitors: ${JSON.stringify(mons)}`);
@@ -107,6 +109,10 @@ if (typeof app.sysname !== "undefined") {
         max_width = working_area[2];
       if (working_area[3] > max_height)
         max_height = working_area[3];
+    }
+    } else {
+      max_width = 1920;
+      max_height = 1080;
     }
     //console.log(`max_width=${max_width}, max_height=${max_height}`);
   })();
