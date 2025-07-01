@@ -521,6 +521,6 @@ function subAdjust() {
     subs.sub_number = nsubs - 1;
     subs.line_number = nlines - 1;
   }
-
-  console.log(subs);
+  //console.log(subs);
 }
+
