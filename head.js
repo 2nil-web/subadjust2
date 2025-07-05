@@ -14,6 +14,13 @@ function decodeHtml(html) {
   return txt.value;
 }
 
+function encodeHtml(rawStr) {
+  var encodedStr = rawStr.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
+    return '&#' + i.charCodeAt(0) + ';';
+  });
+  return encodedStr;
+}
+
 function basename(path) {
   return path.split(/[\\/]/).pop();
 }
@@ -40,6 +47,8 @@ async function read_file(filename) {
       filepath.value = filename;
       //console.log(`Opening ${filename}`);
       var subText = await fs.read(filename);
+      // Teste s'il y a un BOM et l'enléve
+
       //console.log(subText);
       subText.parseSubtitles();
     } else {
@@ -96,20 +105,20 @@ if (typeof app.sysname !== "undefined") {
   var max_width = 0,
     max_height = 0;
   (async () => {
-    console.log(typeof win);
+    //console.log(typeof win);
     if (typeof win !== "undefined") {
-    // Get the max width and height of the working area
-    mons = await win.monitors_info();
-    //console.log(`Monitors: ${JSON.stringify(mons)}`);
-    for (const [key, mon] of Object.entries(mons)) {
-      //console.log(`${key}: ${JSON.stringify(mon)}`);
-      working_area = mon['working area'];
-      //console.log(`${key}[working area]: ${JSON.stringify(working_area)}`);
-      if (working_area[2] > max_width)
-        max_width = working_area[2];
-      if (working_area[3] > max_height)
-        max_height = working_area[3];
-    }
+      // Get the max width and height of the working area
+      mons = await win.monitors_info();
+      //console.log(`Monitors: ${JSON.stringify(mons)}`);
+      for (const [key, mon] of Object.entries(mons)) {
+        //console.log(`${key}: ${JSON.stringify(mon)}`);
+        working_area = mon['working area'];
+        //console.log(`${key}[working area]: ${JSON.stringify(working_area)}`);
+        if (working_area[2] > max_width)
+          max_width = working_area[2];
+        if (working_area[3] > max_height)
+          max_height = working_area[3];
+      }
     } else {
       max_width = 1920;
       max_height = 1080;
@@ -276,7 +285,8 @@ if (typeof app.sysname !== "undefined") {
 
     file_text.addEventListener("focusout", () => {
       if (planTextUpdate && oldText !== file_text.innerText) {
-        console.log("Effective subs updating.");
+        //console.log("Effective subs updating.");
+        console.log("Call parseSubtitles from line 293");
         file_text.innerText.parseSubtitles();
       } else {
         //console.log("Not necessary to update subs.");
@@ -369,12 +379,30 @@ String.prototype.remove_last_empty_lines = function() {
   return s;
 }
 
+function re_empty(re) {
+  var n = true;
+  for (const r of re) {
+    n = false;
+    break;
+  }
+
+  return n;
+}
+
 // Analyze a string as subtitles in subrip format and return the corresponding json structured array
 String.prototype.parseSubtitles = function() {
   var lineNumMaxWidth = this.count_lines().toString().length;
 
+  // Replace all ";" by "," in the timestamps
+  const re0 = /\n\d+:\d+:\d+.\d+[^\S\n]+-->[^\S\n]+\d+:\d+:\d+.\d+\n/g;
+  nopoint = this.replaceAll(re0, function(match) {
+    return match.replace(/\./g, ",");
+  });
+  //console.log(nopoint);
+
   const re = /^\s*(\d+:\d+:\d+,\d+)[^\S\n]+-->[^\S\n]+(\d+:\d+:\d+,\d+)((?:\n(?!\d+:\d+:\d+,\d+\b|\n+\d+$).*)*)/gm;
-  var m = this.matchAll(re);
+  var m = nopoint.matchAll(re);
+  //if (re_empty(m)) { }
 
   let nsubs = 0,
     nlines = 1;
@@ -383,7 +411,7 @@ String.prototype.parseSubtitles = function() {
   var correctSubText = "",
     correctSubLines = "";
   for (const sub of m) {
-    //console.log("processing line "+nlines);
+    //console.log(`processing line ${nlines} for ${sub}`);
     if (sub.length === 4) {
       sub_arr.push({
         "appearance_tc": sub[1],
@@ -414,15 +442,28 @@ String.prototype.parseSubtitles = function() {
   //file_lines.style.width="2em";
   file_text.innerText = correctSubText;
   file_text.style.height = nlines.toString() + "em";
-  fatc = sub_arr[0].appearance_tc;
-  latc = sub_arr.at(-1).appearance_tc;
-  ldtc = sub_arr.at(-1).disappearance_tc;
-  ldms = tc_to_ms(ldtc);
-  fams = tc_to_ms(fatc);
-  dur_ms = ldms - fams;
-  dur_tc = new Date(dur_ms).toISOString().slice(11, 23);
-  //console.log(` ${ldtc}(${ldms})\n-${fatc}(${fams})\n-------------\n=${dur_tc}(${dur_ms})`);
+  var fatc = "00:00:00,000",
+    latc = "00:00:00,000",
+    ldtc = "00:00:00,000",
+    ldms = 0,
+    fams = 0,
+    dur_ms = 0,
+    dur_tc = "00:00:00,000";
 
+  if (sub_arr.length > 0) {
+    /*console.log(`${typeof sub_arr}`);
+    console.log(`${sub_arr.length}`);
+    console.log("sub_arr");
+    console.log(`${JSON.stringify(sub_arr)}`);*/
+    fatc = sub_arr[0].appearance_tc;
+    latc = sub_arr.at(-1).appearance_tc;
+    ldtc = sub_arr.at(-1).disappearance_tc;
+    ldms = tc_to_ms(ldtc);
+    fams = tc_to_ms(fatc);
+    dur_ms = ldms - fams;
+    dur_tc = new Date(dur_ms).toISOString().slice(11, 23);
+    //console.log(` ${ldtc}(${ldms})\n-${fatc}(${fams})\n-------------\n=${dur_tc}(${dur_ms})`);
+  }
   subs = {
     "first_appearance_tc": fatc,
     "last_appearance_tc": latc,
@@ -453,7 +494,8 @@ function coeffAdjust(from_time = true) {
   offset.value = parseFloat((new_start_ms - old_start_ms) / 1000);
   var new_dur_ms = new_end_ms - new_start_ms;
   var old_dur_ms = old_end_ms - old_start_ms;
-  factor.value = parseFloat(new_dur_ms / old_dur_ms);
+  if (old_dur_ms !== 0) factor.value = parseFloat(new_dur_ms / old_dur_ms);
+  else factor.value = 1;
   //console.log(`End - coeffAdjust - start_time:${start_time.value}, end_time:${end_time.value}, offset:${offset.value}, factor:${factor.value}`);
 }
 
@@ -529,4 +571,3 @@ function subAdjust() {
   }
   //console.log(subs);
 }
-
