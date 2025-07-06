@@ -57,32 +57,29 @@ async function read_file(filename) {
   }
 }
 
-async function nomodif() {
-  var actualSubText = file_text.innerText;
-  var savedSubText = await fs.read(filepath.value);
-
-  console.log(savedSubText);
-
-  if (actualSubText == savedSubText) return true;
-
-  return (await gui.msgbox("Your actual modifications will be lost, is that OK ?", 2));
+function real_exit() {
+  localStorage.setItem(document.title + "_incr", "0");
+  bc.close();
+  app.exit();
 }
 
 async function clean_exit() {
-  if (await nomodif()) {
-    console.log("clean_exit");
-    localStorage.setItem(document.title + "_incr", "0");
-    bc.close();
-    app.exit();
-  }
+  console.log("clean_exit");
+  var actualSubText = file_text.innerText;
+  var readSubText = await fs.read(filepath.value);
+
+  if (offset.value == "0" && factor.value == "1" && actualSubText == readSubText) real_exit();
+  if (!(await gui.msgbox("Do you want to keep your pending modifications?\nChoose 'Yes/Oui/Si/Ja/Da' to do so.\nElse you will exit from the app and lost all of them.", 2))) real_exit();
 }
 
 async function reload_file() {
-  var oldSubText = file_text.innerText;
-  var newSubText = await fs.read(filepath.value);
+  console.log("reload_file");
+  console.log(`offset:${offset.value}, factor:${factor.value}`);
+  var actualSubText = file_text.innerText;
+  var reloadedSubText = await fs.read(filepath.value);
 
-  if (newSubText != oldSubText && (await gui.msgbox("Your actual modifications will be lost, is that OK ?", 2))) {
-    newSubText.parseSubtitles();
+  if (actualSubText != reloadedSubText && !(await gui.msgbox("Your actual modifications will be lost.\nDo you want to keep them ?", 2))) {
+    reloadedSubText.parseSubtitles();
   }
 }
 
@@ -137,6 +134,7 @@ if (typeof app.sysname !== "undefined") {
       max_height = 1080;
     }
     //console.log(`max_width=${max_width}, max_height=${max_height}`);
+    app.on_exit_msg("Sure to quit the app ?");
   })();
 
 
@@ -423,7 +421,7 @@ String.prototype.srtMatchAll = function() {
 
 // Analyze a string as subtitles in subrip format and return the corresponding json structured array
 String.prototype.parseSubtitles = function() {
-  var m=this.srtMatchAll();
+  var m = this.srtMatchAll();
 
   let nsubs = 0,
     nlines = 1;
@@ -435,10 +433,10 @@ String.prototype.parseSubtitles = function() {
     //console.log(`processing line ${nlines} for ${sub}`);
     var sub1;
     if (sub.length === 5) {
-      sub[1]=sub[1].replace(/\./g, ",");
-      sub[2]=sub[2].replace(/\./g, ",");
-      sub[3]=sub[3].trim();
-      sub[4]=sub[4].trim("\n").trim("\r");
+      sub[1] = sub[1].replace(/\./g, ",");
+      sub[2] = sub[2].replace(/\./g, ",");
+      sub[3] = sub[3].trim();
+      sub[4] = sub[4].trim("\n").trim("\r");
 
       var nline = 3 + sub[4].count_lines();
       for (var n = nlines; n < nlines + nline; n++) {
@@ -448,11 +446,15 @@ String.prototype.parseSubtitles = function() {
       nlines += nline;
       correctSubText += (nsubs + 1).toString() + '\n';
       correctSubText += sub[1] + " --> " + sub[2];
-      sub1={ "appearance": sub[1], "disappearance": sub[2], "text": sub[4] };
+      sub1 = {
+        "appearance": sub[1],
+        "disappearance": sub[2],
+        "text": sub[4]
+      };
 
       if (sub[3].length > 0) {
-        correctSubText += ' '+sub[3];
-        sub1.coordinate=sub[3];
+        correctSubText += ' ' + sub[3];
+        sub1.coordinate = sub[3];
       }
       sub_arr.push(sub1);
 
@@ -577,7 +579,7 @@ function subAdjust() {
       lines += `${nsubs}`;
       texts += `${nsubs}\n`;
       texts += `${sub.appearance} --> ${sub.disappearance}`;
-      if (Object.hasOwn(sub, "coordinate")) texts+=' '+sub.coordinate;
+      if (Object.hasOwn(sub, "coordinate")) texts += ' ' + sub.coordinate;
       texts += `\n${sub.text}\n\n`;
       nsubs++;
       var nline = 4 + sub.text.count_lines();
