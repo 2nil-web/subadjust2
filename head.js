@@ -57,6 +57,26 @@ async function read_file(filename) {
   }
 }
 
+async function nomodif() {
+  var actualSubText = file_text.innerText;
+  var savedSubText = await fs.read(filepath.value);
+
+  console.log(savedSubText);
+
+  if (actualSubText == savedSubText) return true;
+
+  return (await gui.msgbox("Your actual modifications will be lost, is that OK ?", 2));
+}
+
+async function clean_exit() {
+  if (await nomodif()) {
+    console.log("clean_exit");
+    localStorage.setItem(document.title + "_incr", "0");
+    bc.close();
+    app.exit();
+  }
+}
+
 async function reload_file() {
   var oldSubText = file_text.innerText;
   var newSubText = await fs.read(filepath.value);
@@ -94,13 +114,6 @@ if (typeof app.sysname !== "undefined") {
   */
 
   app.set_icon("app.ico");
-
-  function clean_exit() {
-    console.log("clean_exit");
-    localStorage.setItem(document.title + "_incr", "0");
-    bc.close();
-    app.exit();
-  }
 
   var max_width = 0,
     max_height = 0;
@@ -244,20 +257,20 @@ if (typeof app.sysname !== "undefined") {
     toMiddleTime.addEventListener("click", () => {
       getElements();
       var closest_tc;
-      var closest_ms = tc_to_ms(subs.last_appearance_tc);
-      var mid_ms = (closest_ms + tc_to_ms(subs.first_appearance_tc)) / 2;
+      var closest_ms = tc_to_ms(subs.last_appearance);
+      var mid_ms = (closest_ms + tc_to_ms(subs.first_appearance)) / 2;
       var closest_line = 0,
         nlines = 0;
       console.log(`AVT mid_ms: ${mid_ms}`);
 
       for (sub of subs.subtitles) {
-        var curr_ms = tc_to_ms(sub.appearance_tc);
+        var curr_ms = tc_to_ms(sub.appearance);
         var diff_ms = mid_ms - curr_ms;
         if (diff_ms < 0) break;
 
         if (closest_ms > diff_ms) {
           closest_ms = curr_ms;
-          closest_tc = sub.appearance_tc;
+          closest_tc = sub.appearance;
           closest_line = nlines;
         }
 
@@ -286,7 +299,7 @@ if (typeof app.sysname !== "undefined") {
     file_text.addEventListener("focusout", () => {
       if (planTextUpdate && oldText !== file_text.innerText) {
         //console.log("Effective subs updating.");
-        console.log("Call parseSubtitles from line 293");
+        //console.log("Call parseSubtitles from line 293");
         file_text.innerText.parseSubtitles();
       } else {
         //console.log("Not necessary to update subs.");
@@ -389,10 +402,7 @@ function re_empty(re) {
   return n;
 }
 
-// Analyze a string as subtitles in subrip format and return the corresponding json structured array
-String.prototype.parseSubtitles = function() {
-  var lineNumMaxWidth = this.count_lines().toString().length;
-
+String.prototype.srtMatchAllRES = function() {
   // Replace all ";" by "," in the timestamps
   const re0 = /\n\d+:\d+:\d+.\d+[^\S\n]+-->[^\S\n]+\d+:\d+:\d+.\d+\n/g;
   nopoint = this.replaceAll(re0, function(match) {
@@ -401,8 +411,19 @@ String.prototype.parseSubtitles = function() {
   //console.log(nopoint);
 
   const re = /^\s*(\d+:\d+:\d+,\d+)[^\S\n]+-->[^\S\n]+(\d+:\d+:\d+,\d+)((?:\n(?!\d+:\d+:\d+,\d+\b|\n+\d+$).*)*)/gm;
-  var m = nopoint.matchAll(re);
-  //if (re_empty(m)) { }
+  return nopoint.matchAll(re);
+};
+
+String.prototype.srtMatchAll = function() {
+  //const re = /^\s*(\d+:\d+:\d+.\d+)[^\S\n]+-->[^\S\n]+(\d+:\d+:\d+.\d+)((?:\n(?!\d+:\d+:\d+.\d+\b|\n+\d+$).*)*)/gm;
+  //const re = /^\s*(\d\d:\d\d:\d\d.\d\d\d)[^\S\n]+-->[^\S\n]+(\d\d:\d\d:\d\d.\d\d\d)((?:\n(?!\d\d:\d\d:\d\d.\d\d\d\b|\n+\d+$).*)*)/gm;
+  const re = /^\s*(\d\d:\d\d:\d\d.\d\d\d)[^\S\n]+-->[^\S\n]+(\d\d:\d\d:\d\d.\d\d\d) *(.*)((?:\n(?!\d\d:\d\d:\d\d.\d\d\d\b|\n+\d+$).*)*)/gm;
+  return this.matchAll(re);
+};
+
+// Analyze a string as subtitles in subrip format and return the corresponding json structured array
+String.prototype.parseSubtitles = function() {
+  var m=this.srtMatchAll();
 
   let nsubs = 0,
     nlines = 1;
@@ -412,22 +433,30 @@ String.prototype.parseSubtitles = function() {
     correctSubLines = "";
   for (const sub of m) {
     //console.log(`processing line ${nlines} for ${sub}`);
-    if (sub.length === 4) {
-      sub_arr.push({
-        "appearance_tc": sub[1],
-        "disappearance_tc": sub[2],
-        "text": sub[3].trim("\n").trim("\r")
-      });
+    var sub1;
+    if (sub.length === 5) {
+      sub[1]=sub[1].replace(/\./g, ",");
+      sub[2]=sub[2].replace(/\./g, ",");
+      sub[3]=sub[3].trim();
+      sub[4]=sub[4].trim("\n").trim("\r");
 
-      var nline = 3 + sub[3].count_lines();
+      var nline = 3 + sub[4].count_lines();
       for (var n = nlines; n < nlines + nline; n++) {
-        //correctSubLines += n.toString().padStart(lineNumMaxWidth, ' ') + '\n';
         correctSubLines += n + '\n';
       }
+
       nlines += nline;
       correctSubText += (nsubs + 1).toString() + '\n';
       correctSubText += sub[1] + " --> " + sub[2];
-      correctSubText += sub[3] + '\n\n';
+      sub1={ "appearance": sub[1], "disappearance": sub[2], "text": sub[4] };
+
+      if (sub[3].length > 0) {
+        correctSubText += ' '+sub[3];
+        sub1.coordinate=sub[3];
+      }
+      sub_arr.push(sub1);
+
+      correctSubText += '\n' + sub[4] + '\n\n';
       nsubs++;
     } else console.log(`{ "error": "Issue with subtitle number ${nsubs} (line: ${line})" }`);
   }
@@ -451,44 +480,38 @@ String.prototype.parseSubtitles = function() {
     dur_tc = "00:00:00,000";
 
   if (sub_arr.length > 0) {
-    /*console.log(`${typeof sub_arr}`);
-    console.log(`${sub_arr.length}`);
-    console.log("sub_arr");
-    console.log(`${JSON.stringify(sub_arr)}`);*/
-    fatc = sub_arr[0].appearance_tc;
-    latc = sub_arr.at(-1).appearance_tc;
-    ldtc = sub_arr.at(-1).disappearance_tc;
+    fatc = sub_arr[0].appearance;
+    latc = sub_arr.at(-1).appearance;
+    ldtc = sub_arr.at(-1).disappearance;
     ldms = tc_to_ms(ldtc);
     fams = tc_to_ms(fatc);
     dur_ms = ldms - fams;
     dur_tc = new Date(dur_ms).toISOString().slice(11, 23);
-    //console.log(` ${ldtc}(${ldms})\n-${fatc}(${fams})\n-------------\n=${dur_tc}(${dur_ms})`);
   }
+
   subs = {
-    "first_appearance_tc": fatc,
-    "last_appearance_tc": latc,
-    "last_disappearance_tc": ldtc,
-    "duration_tc": dur_tc,
+    "first_appearance": fatc,
+    "last_appearance": latc,
+    "last_disappearance": ldtc,
+    "duration": dur_tc,
     "sub_number": nsubs,
     "line_number": nlines,
     "subtitles": sub_arr
   };
 
-  start_time.value = subs.first_appearance_tc.replace(/,/, '.');
-  end_time.value = subs.last_appearance_tc.replace(/,/, '.');
+  start_time.value = subs.first_appearance.replace(/,/, '.');
+  end_time.value = subs.last_appearance.replace(/,/, '.');
   current_line_number = subs.nlines;
-
   coeffAdjust();
-
   console.log(subs);
   return subs;
 };
 
-// Compute the coefficients (offset and factor) from the times (start and end)
-function coeffAdjust(from_time = true) {
+// Adjust the coefficients (offset and factor) from the times (start and end)
+function coeffAdjust() {
   //console.log(`Start coeffAdjust - start_time:${start_time.value}, end_time:${end_time.value}, offset:${offset.value}, factor:${factor.value}`);
-  var old_start_ms = tc_to_ms(subs.first_appearance_tc);
-  var old_end_ms = tc_to_ms(subs.last_appearance_tc);
+  var old_start_ms = tc_to_ms(subs.first_appearance);
+  var old_end_ms = tc_to_ms(subs.last_appearance);
   var new_start_ms = tc_to_ms(start_time.value);
   var new_end_ms = tc_to_ms(end_time.value);
   offset.value = parseFloat((new_start_ms - old_start_ms) / 1000);
@@ -499,7 +522,7 @@ function coeffAdjust(from_time = true) {
   //console.log(`End - coeffAdjust - start_time:${start_time.value}, end_time:${end_time.value}, offset:${offset.value}, factor:${factor.value}`);
 }
 
-// Compute the times (start and end) from coefficients (offset and factor)
+// Adjust the times (start and end) from coefficients (offset and factor)
 function timeAdjust() {
   var old_start_ms = tc_to_ms(start_time.value);
   var old_end_ms = tc_to_ms(end_time.value);
@@ -523,15 +546,15 @@ function adj_tc(off, fac, old_tc, lab_tc = "") {
 }
 
 function head_adj(off, fac, subs) {
-  subs.first_appearance_tc = adj_tc(off, fac, subs.first_appearance_tc, "first_appearance_tc");
-  subs.last_appearance_tc = adj_tc(off, fac, subs.last_appearance_tc, "last_appearance_tc");
-  subs.last_disappearance_tc = adj_tc(off, fac, subs.last_disappearance_tc, "last_disappearance_tc");
-  subs.duration_tc = adj_tc(off, fac, subs.duration_tc, "duration_tc");
+  subs.first_appearance = adj_tc(off, fac, subs.first_appearance, "first_appearance");
+  subs.last_appearance = adj_tc(off, fac, subs.last_appearance, "last_appearance");
+  subs.last_disappearance = adj_tc(off, fac, subs.last_disappearance, "last_disappearance");
+  subs.duration = adj_tc(off, fac, subs.duration, "duration");
 }
 
 function sub_adj(off, fac, sub) {
-  sub.appearance_tc = adj_tc(off, fac, sub.appearance_tc, "sub.appearance_tc");
-  sub.disappearance_tc = adj_tc(off, fac, sub.disappearance_tc, "sub.disappearance_tc");
+  sub.appearance = adj_tc(off, fac, sub.appearance, "sub.appearance");
+  sub.disappearance = adj_tc(off, fac, sub.disappearance, "sub.disappearance");
 }
 
 function subAdjust() {
@@ -550,11 +573,12 @@ function subAdjust() {
     let nlines = 0;
     for (var sub of subs.subtitles) {
       sub_adj(offs, fact, sub);
-      //console.log(`${sub.appearance_tc} --> ${sub.disappearance_tc}`);
+      //console.log(`${sub.appearance} --> ${sub.disappearance}`);
       lines += `${nsubs}`;
       texts += `${nsubs}\n`;
-      texts += `${sub.appearance_tc} --> ${sub.disappearance_tc}\n`;
-      texts += `${sub.text}\n\n`;
+      texts += `${sub.appearance} --> ${sub.disappearance}`;
+      if (Object.hasOwn(sub, "coordinate")) texts+=' '+sub.coordinate;
+      texts += `\n${sub.text}\n\n`;
       nsubs++;
       var nline = 4 + sub.text.count_lines();
       for (var n = nlines; n < nlines + nline; n++) {
