@@ -289,6 +289,35 @@ if (typeof app.sysname !== "undefined") {
       current_line_number.value = subs.line_number;
     });
 
+
+    reRun.addEventListener("click", () => {
+      var sre1 = document.getElementById("reSrch").value;
+      console.log(`sre1: ${sre1}`);
+
+      var re = sre1.match(/^\/(.*)\/(.*)/);
+      var str, flg = "";
+
+      if (re == null) {
+        str = sre1;
+      } else {
+        str = re[1];
+        flg = re[2];
+      }
+
+      console.log(`str: ${str}`);
+      console.log(`flg: ${flg}`);
+      var re1 = new RegExp(str, flg);
+      var re2 = document.getElementById("reRepl").value;
+
+      console.log(`re1: ${re1}`);
+      console.log(`re2: ${re2}`);
+
+      var s = document.getElementById("file_text").innerText;
+      s = s.replace(re1, re2);
+      document.getElementById("file_text").innerText = s;
+    });
+
+
     file_text.addEventListener("focusin", () => {
       //console.log("May plan to update subs.");
       oldText = file_text.innerText;
