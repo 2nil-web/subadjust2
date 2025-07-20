@@ -101,6 +101,28 @@ input[type='number'] {
   text-align: end;
 }
 
+@keyframes blink_red {
+  50% {
+    border: 4px solid #ff0000;
+  }
+}
+
+@keyframes blink_green {
+  50% {
+    border: 4px solid #00ff00;
+  }
+}
+
+.blink_ok {
+  animation: blink_green .5s step-end infinite alternate;
+  animation-iteration-count: 3;
+}
+
+.blink_ko {
+  animation: blink_red .5s step-end infinite alternate;
+  animation-iteration-count: 3;
+}
+
 #file_text {
   overflow: hidden;
   /* top right bottom left*/
@@ -116,7 +138,8 @@ input[type='number'] {
 #file_container {
   display: flex;
   position: absolute;
-  border: unset;
+  border: 4px solid transparent;
+  /*  border: unset;*/
   /* top right bottom left */
   inset: 380px 4px 4px 4px;
   line-height: 1em;

@@ -172,6 +172,10 @@ if (typeof app.sysname !== "undefined") {
     } else elt.target.value = subs.line_number;
   }
 
+  async function sleep(nsec) {
+    await new Promise(r => setTimeout(r, nsec * 1000));
+  }
+
   async function do_load() {
     getElements();
     document.addEventListener("keyup", exit_on_esc);
@@ -290,7 +294,7 @@ if (typeof app.sysname !== "undefined") {
     });
 
 
-    reRun.addEventListener("click", () => {
+    reRun.addEventListener("click", async () => {
       var sre1 = document.getElementById("reSrch").value;
       //console.log(`sre1: ${sre1}`);
 
@@ -312,9 +316,22 @@ if (typeof app.sysname !== "undefined") {
       //console.log(`re1: ${re1}`);
       //console.log(`re2: ${re2}`);
 
-      var s = document.getElementById("file_text").innerText;
-      s = s.replace(re1, re2);
-      document.getElementById("file_text").innerText = s;
+      var orig = document.getElementById("file_text").innerText;
+      var res = orig.replace(re1, re2);
+
+      if (res != orig) {
+        console.log("RegExp modif OK");
+        file_container.classList.add("blink_ok");
+        document.getElementById("file_text").innerText = res;
+        await sleep(2);
+        file_container.classList.remove("blink_ok");
+      } else {
+        console.log("RegExp modif KO");
+        file_container.classList.add("blink_ko");
+        await sleep(2);
+        file_container.classList.remove("blink_ko");
+        //gui.msgbox("No change");
+      }
     });
 
 
