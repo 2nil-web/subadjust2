@@ -292,7 +292,7 @@ if (typeof app.sysname !== "undefined") {
 
     reRun.addEventListener("click", () => {
       var sre1 = document.getElementById("reSrch").value;
-      console.log(`sre1: ${sre1}`);
+      //console.log(`sre1: ${sre1}`);
 
       var re = sre1.match(/^\/(.*)\/(.*)/);
       var str, flg = "";
@@ -304,13 +304,13 @@ if (typeof app.sysname !== "undefined") {
         flg = re[2];
       }
 
-      console.log(`str: ${str}`);
-      console.log(`flg: ${flg}`);
+      //console.log(`str: ${str}`);
+      //console.log(`flg: ${flg}`);
       var re1 = new RegExp(str, flg);
       var re2 = document.getElementById("reRepl").value;
 
-      console.log(`re1: ${re1}`);
-      console.log(`re2: ${re2}`);
+      //console.log(`re1: ${re1}`);
+      //console.log(`re2: ${re2}`);
 
       var s = document.getElementById("file_text").innerText;
       s = s.replace(re1, re2);
