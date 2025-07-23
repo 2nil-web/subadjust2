@@ -134,7 +134,7 @@ if (typeof app.sysname !== "undefined") {
       max_height = 1080;
     }
     //console.log(`max_width=${max_width}, max_height=${max_height}`);
-    app.on_exit_msg("Sure to quit the app ?");
+    app.on_close("clean_exit()");
   })();
 
 
