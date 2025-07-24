@@ -69,7 +69,29 @@ async function clean_exit() {
   var readSubText = await fs.read(filepath.value);
 
   if (offset.value == "0" && factor.value == "1" && actualSubText == readSubText) real_exit();
-  if (!(await gui.msgbox("Do you want to keep your pending modifications?\nChoose 'Yes/Oui/Si/Ja/Da' to do so.\nElse you will exit from the app and lost all of them.", 2))) real_exit();
+  else {
+    // Disable esc_on_exit which may interfer with esc on alert
+    document.removeEventListener("keyup", exit_on_esc);
+    var res=await gui.msgbox("Do you want to save your current changes to the file before leaving ?", 3);
+    // Re-enable esc_on_exit
+    await new Promise(r => setTimeout(r, 400));
+    document.addEventListener("keyup", exit_on_esc);
+
+    switch (res) {
+     case "yes":
+      //console.log("Saving before exit: ");
+      save_file();
+      real_exit();
+      break;
+     case "no":
+      //console.log("Not saving before exit: ");
+      real_exit();
+      break;
+     case "cancel":
+      //console.log("Aborting exit: ");
+      break;
+   }
+ }
 }
 
 async function reload_file() {
