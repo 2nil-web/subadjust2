@@ -73,14 +73,10 @@ async function clean_exit() {
     // Disable esc_on_exit which may interfer with esc on alert
     document.removeEventListener("keyup", exit_on_esc);
     var res=await gui.msgbox("Do you want to save your current changes to the file before leaving ?", 3);
-    // Re-enable esc_on_exit
-    await new Promise(r => setTimeout(r, 400));
-    document.addEventListener("keyup", exit_on_esc);
-
     switch (res) {
      case "yes":
       //console.log("Saving before exit: ");
-      save_file();
+      await save_file();
       real_exit();
       break;
      case "no":
@@ -91,6 +87,10 @@ async function clean_exit() {
       //console.log("Aborting exit: ");
       break;
    }
+
+    // Re-enable esc_on_exit
+    await new Promise(r => setTimeout(r, 400));
+    document.addEventListener("keyup", exit_on_esc);
  }
 }
 
