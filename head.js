@@ -66,7 +66,7 @@ function real_exit() {
 }
 
 async function clean_exit() {
-  console.log("clean_exit");
+  //console.log("clean_exit");
   var actualSubText = file_text.innerText;
   var readSubText = await fs.read(filepath.value);
 
@@ -96,8 +96,8 @@ async function clean_exit() {
 }
 
 async function reload_file() {
-  console.log("reload_file");
-  console.log(`offset:${offset.value}, factor:${factor.value}`);
+  //console.log("reload_file");
+  //console.log(`offset:${offset.value}, factor:${factor.value}`);
   var actualSubText = file_text.innerText;
   var reloadedSubText = await fs.read(filepath.value);
 
@@ -286,7 +286,7 @@ if (typeof app.sysname !== "undefined") {
       var mid_ms = (closest_ms + tc_to_ms(subs.first_appearance)) / 2;
       var closest_line = 0,
         nlines = 0;
-      console.log(`AVT mid_ms: ${mid_ms}`);
+      //console.log(`AVT mid_ms: ${mid_ms}`);
 
       for (sub of subs.subtitles) {
         var curr_ms = tc_to_ms(sub.appearance);
@@ -306,8 +306,8 @@ if (typeof app.sysname !== "undefined") {
       file_container.scrollTop = (closest_line + 1) * lh;
       current_line_number.value = closest_line + 2;
 
-      console.log(`APR closest_tc: ${closest_tc}, closest_ms: ${closest_ms}, closest_line: ${closest_line}`);
-      console.log("");
+      //console.log(`APR closest_tc: ${closest_tc}, closest_ms: ${closest_ms}, closest_line: ${closest_line}`);
+      //console.log("");
     });
 
     toBottom.addEventListener("click", () => {
@@ -343,13 +343,13 @@ if (typeof app.sysname !== "undefined") {
       var res = orig.replace(re1, re2);
 
       if (res != orig) {
-        console.log("RegExp modif OK");
+        //console.log("RegExp modif OK");
         file_container.classList.add("blink_ok");
         document.getElementById("file_text").innerText = res;
         await sleep(2);
         file_container.classList.remove("blink_ok");
       } else {
-        console.log("RegExp modif KO");
+        //console.log("RegExp modif KO");
         file_container.classList.add("blink_ko");
         await sleep(2);
         file_container.classList.remove("blink_ko");
@@ -529,7 +529,7 @@ String.prototype.parseSubtitles = function() {
 
       correctSubText += '\n' + sub[4] + '\n\n';
       nsubs++;
-    } else console.log(`{ "error": "Issue with subtitle number ${nsubs} (line: ${line})" }`);
+    } //else console.log(`{ "error": "Issue with subtitle number ${nsubs} (line: ${line})" }`);
   }
 
   // Remove last 2 lines of correctSubLines
@@ -574,7 +574,7 @@ String.prototype.parseSubtitles = function() {
   end_time.value = subs.last_appearance.replace(/,/, '.');
   current_line_number = subs.nlines;
   coeffAdjust();
-  console.log(subs);
+  //console.log(subs);
   return subs;
 };
 
@@ -608,11 +608,11 @@ var adj_log = false;
 
 function adj_tc(off, fac, old_tc, lab_tc = "") {
   let old_ms = tc_to_ms(old_tc);
-  if (lab_tc.length > 0 && adj_log) console.log(`AVT ADJ ${lab_tc}, ${old_tc} (${old_ms})`);
+  //if (lab_tc.length > 0 && adj_log) console.log(`AVT ADJ ${lab_tc}, ${old_tc} (${old_ms})`);
 
   let new_ms = 1000 * off + old_ms * fac;
   let new_tc = new Date(new_ms).toISOString().slice(11, 23);
-  if (lab_tc.length > 0 && adj_log) console.log(`APR ADJ ${lab_tc}, ${new_tc} (${new_ms})`);
+  //if (lab_tc.length > 0 && adj_log) console.log(`APR ADJ ${lab_tc}, ${new_tc} (${new_ms})`);
   return new_tc;
 }
 
