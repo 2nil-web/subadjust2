@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--https://codepen.io/gareys/pen/meRgLG-->
+<svg width="645" height="645" style="border:1px solid black" version="1.1" viewBox="0 0 645 645" xmlns="http://www.w3.org/2000/svg">
+ <style>#sma { animation: counter-rotation 2.5s infinite linear; transform-origin: 100.136px 225.345px; }
+    #med { animation: rotation 3.75s infinite linear; transform-origin: 254.675px 379.447px; }
+    #lar { animation: counter-rotation 5s infinite linear; transform-origin: 461.37px 173.694px; }
+    @keyframes rotation { from { transform: rotate(0deg); } to { transform: rotate(359deg); } }
+    @keyframes counter-rotation { from { transform: rotate(359deg); } to { transform: rotate(0deg); } }</style>
+ <g transform="matrix(1.0157 0 0 1.0157 0 61)" fill="dodgerblue">
+  <path id="sma" d="m200 236v-21l-29-4c-2-10-6-18-11-26l18-23-15-15-23 18c-8-5-17-9-26-11l-4-29h-20l-4 29c-10 2-18 6-26 11l-23-18-15 15 18 23c-5 8-9 17-11 26l-29 4v21l29 4c2 10 6 18 11 26l-18 23 15 15 23-18c8 5 17 9 26 11l4 29h21l4-29c10-2 18-6 26-11l23 18 15-15-18-23c5-8 9-17 11-26zm-100 26c-20 0-37-17-37-37s17-37 37-37 37 17 37 37-16 37-37 37z"/>
+  <path id="med" d="m392 390v-21l-28-4c-1-10-4-19-7-28l23-17-11-18-27 11c-6-8-13-14-20-20l11-26-18-11-17 23c-9-4-18-6-28-7l-4-28h-21l-4 28c-10 1-19 4-28 7l-17-23-18 11 11 26c-8 6-14 13-20 20l-26-11-11 18 23 17c-4 9-6 18-7 28l-28 4v21l28 4c1 10 4 19 7 28l-23 17 11 18 26-11c6 8 13 14 20 20l-11 26 18 11 17-23c9 4 18 6 28 7l4 28h21l4-28c10-1 19-4 28-7l17 23 18-11-11-26c8-6 14-13 20-20l26 11 11-18-23-17c4-9 6-18 7-28zm-137 63c-41 0-74-33-74-74s33-74 74-74 74 33 74 74c-1 41-34 74-74 74z"/>
+  <path id="lar" d="m635 184v-21l-29-4c-1-10-3-19-6-28l25-14-8-19-28 7c-5-8-10-16-16-24l19-23-15-15-23 17c-7-6-15-11-24-16l7-28-19-8-14 25c-9-3-18-5-28-6l-4-27h-21l-4 29c-10 1-19 3-28 6l-14-26-19 8 7 28c-8 5-16 10-24 16l-23-17-15 14 17 23c-6 7-11 15-16 24l-28-7-8 19 25 14c-3 9-5 18-6 28l-29 4v21l29 4c1 10 3 19 6 28l-25 14 8 19 28-7c5 8 10 16 16 24l-17 23 15 15 23-17c7 6 15 11 24 16l-7 28 19 8 14-25c9 3 18 5 28 6l4 29h21l4-29c10-1 19-3 28-6l14 25 19-8-7-28c8-5 16-10 24-16l23 17 15-15-17-23c6-7 11-15 16-24l28 7 8-19-25-14c3-9 5-18 6-28zm-174 100c-61 0-110-49-110-110s50-110 110-110 110 49 110 110-49 110-110 110z"/>
+ </g>
+</svg>

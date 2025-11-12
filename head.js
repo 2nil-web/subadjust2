@@ -28,7 +28,9 @@ function basename(path) {
 
 // *fs.write: at least 1 parameter, truncate and write to the file who's name is provided as the first parameter, the content of all the following parameters, return true if the operation was OK, else false.
 async function save_file() {
+  load_img.style.display="block";
   await fs.write(filepath.value, file_text.innerText);
+  load_img.style.display="none";
 }
 
 async function saveas_file() {
@@ -75,7 +77,6 @@ async function clean_exit() {
     var res=await gui.msgbox("Do you want to save your current changes to the file before leaving ?", 3);
     switch (res) {
      case "yes":
-      //console.log("Saving before exit: ");
       await save_file();
       real_exit();
       break;
