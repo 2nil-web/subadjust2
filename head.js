@@ -25,17 +25,27 @@ function basename(path) {
   return path.split(/[\\/]/).pop();
 }
 
+async function write_file(filepath) {
+  // Insure that dots in timestamp are all replaced by commas
+  const re0 = /\n\d+:\d+:\d+.\d+[^\S\n]+-->[^\S\n]+\d+:\d+:\d+.\d+\n/g;
+  no_dots = file_text.innerText.replaceAll(re0, function(match) {
+    return match.replace(/\./g, ",");
+  });
+
+  await fs.write(filepath, no_dots);
+  file_text.innerText=no_dots;
+}
 
 // *fs.write: at least 1 parameter, truncate and write to the file who's name is provided as the first parameter, the content of all the following parameters, return true if the operation was OK, else false.
 async function save_file() {
   load_img.style.display="block";
-  await fs.write(filepath.value, file_text.innerText);
-  load_img.style.display="None";
+  await write_file(filepath.value);
+  load_img.style.display="none";
 }
 
 async function saveas_file() {
   var file = (await gui.savedlg());
-  if (file.length > 0) await fs.write(file, file_text.innerText);
+  if (file.length > 0) await write_file(file);
 }
 
 async function read_file(filename) {
@@ -391,11 +401,11 @@ function exit_on_esc() {
   }
 }
 
-// Return a time code in the form hh:mm:ss,sss ==> NO !!! or hh:mm:ss.sss in milliseconds
+// Return a time code in the form hh:mm:ss,sss or hh:mm:ss.sss in milliseconds
 function tc_to_ms(tc) {
   // 
-  tc = tc.replace(/\./, ",");
-  const re = /(\d+):(\d+):(\d+),(\d+)/;
+  tc = tc.replace(/,/, ".");
+  const re = /(\d+):(\d+):(\d+)\.(\d+)/;
   var m = tc.match(re);
 
   let ms = 0;
@@ -407,7 +417,7 @@ function tc_to_ms(tc) {
   return ms;
 }
 
-/* Replaced by new Date(ms).toISOString().slice(11, 23).replace(/\./,",")
+/* Replaced by new Date(ms).toISOString().slice(11, 23)
  * Millisecond to time code correct for integer number up to 100 hours (3 600 000 000)
 function ms_to_tc(ms) {
   // Pad number with 0 to obtain a string of 9 characters long
@@ -484,7 +494,7 @@ String.prototype.srtMatchAllRES = function() {
 String.prototype.srtMatchAll = function() {
   //const re = /^\s*(\d+:\d+:\d+.\d+)[^\S\n]+-->[^\S\n]+(\d+:\d+:\d+.\d+)((?:\n(?!\d+:\d+:\d+.\d+\b|\n+\d+$).*)*)/gm;
   //const re = /^\s*(\d\d:\d\d:\d\d.\d\d\d)[^\S\n]+-->[^\S\n]+(\d\d:\d\d:\d\d.\d\d\d)((?:\n(?!\d\d:\d\d:\d\d.\d\d\d\b|\n+\d+$).*)*)/gm;
-  const re = /^\s*(\d\d:\d\d:\d\d,\d\d\d)[^\S\n]+-->[^\S\n]+(\d\d:\d\d:\d\d,\d\d\d) *(.*)((?:\n(?!\d\d:\d\d:\d\d,\d\d\d\b|\n+\d+$).*)*)/gm;
+  const re = /^\s*(\d\d:\d\d:\d\d.\d\d\d)[^\S\n]+-->[^\S\n]+(\d\d:\d\d:\d\d.\d\d\d) *(.*)((?:\n(?!\d\d:\d\d:\d\d.\d\d\d\b|\n+\d+$).*)*)/gm;
   return this.matchAll(re);
 };
 
@@ -557,7 +567,7 @@ String.prototype.parseSubtitles = function() {
     ldms = tc_to_ms(ldtc);
     fams = tc_to_ms(fatc);
     dur_ms = ldms - fams;
-    dur_tc = new Date(dur_ms).toISOString().slice(11, 23).replace(/\./,",");
+    dur_tc = new Date(dur_ms).toISOString().slice(11, 23);
   }
 
   subs = {
@@ -599,8 +609,8 @@ function timeAdjust() {
   var old_end_ms = tc_to_ms(end_time.value);
   var offs_ms = offset.value * 1000;
   //console.log(`Start timeAdjust - old_start_ms:${old_start_ms}, old_end_ms:${old_end_ms}, offset:${offs_ms}, factor:${factor.value}`);
-  start_time.value = new Date(old_start_ms + offs_ms).toISOString().slice(11, 23).replace(/\./,",");
-  end_time.value = new Date(offs_ms + old_end_ms * factor.value).toISOString().slice(11, 23).replace(/\./,",");
+  start_time.value = new Date(old_start_ms + offs_ms).toISOString().slice(11, 23);
+  end_time.value = new Date(offs_ms + old_end_ms * factor.value).toISOString().slice(11, 23);
   //console.log(`End - timeAdjust - start_time:${start_time.value}, end_time:${end_time.value}, offset:${offset.value}, factor:${factor.value}`);
 }
 
@@ -611,7 +621,7 @@ function adj_tc(off, fac, old_tc, lab_tc = "") {
   //if (lab_tc.length > 0 && adj_log) console.log(`AVT ADJ ${lab_tc}, ${old_tc} (${old_ms})`);
 
   let new_ms = 1000 * off + old_ms * fac;
-  let new_tc = new Date(new_ms).toISOString().slice(11, 23).replace(/\./,",");
+  let new_tc = new Date(new_ms).toISOString().slice(11, 23);
   //if (lab_tc.length > 0 && adj_log) console.log(`APR ADJ ${lab_tc}, ${new_tc} (${new_ms})`);
   return new_tc;
 }
