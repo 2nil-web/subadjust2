@@ -58,7 +58,7 @@ async function read_file(filename) {
       app.set_title(document.title + " - " + basename(filename));
       filepath.value = filename;
       //console.log(`Opening ${filename}`);
-      var subText = await fs.read(filename);
+      var subText = await fs.read_to_utf(filename);
       // Teste s'il y a un BOM et l'enléve
 
       //console.log(subText);
@@ -78,7 +78,7 @@ function real_exit() {
 async function clean_exit() {
   //console.log("clean_exit");
   var actualSubText = file_text.innerText;
-  var readSubText = await fs.read(filepath.value);
+  var readSubText = await fs.read_to_utf(filepath.value);
 
   if (offset.value == "0" && factor.value == "1" && actualSubText == readSubText) real_exit();
   else {
@@ -109,7 +109,7 @@ async function reload_file() {
   //console.log("reload_file");
   //console.log(`offset:${offset.value}, factor:${factor.value}`);
   var actualSubText = file_text.innerText;
-  var reloadedSubText = await fs.read(filepath.value);
+  var reloadedSubText = await fs.read_to_utf(filepath.value);
 
   if (actualSubText != reloadedSubText && !(await gui.msgbox("Your actual modifications will be lost.\nDo you want to keep them ?", 2))) {
     reloadedSubText.parseSubtitles();
@@ -144,7 +144,6 @@ if (typeof app.sysname !== "undefined") {
   */
 
   app.set_icon("app.ico");
-
   var max_width = 0,
     max_height = 0;
   (async () => {
@@ -170,7 +169,6 @@ if (typeof app.sysname !== "undefined") {
     app.on_close("clean_exit()");
   })();
 
-
   // To try to juxtapose multiple subadjust instances
   var bc = new BroadcastChannel(document.title);
 
@@ -183,15 +181,12 @@ if (typeof app.sysname !== "undefined") {
     //console.log(`new X: ${newX}`);
     app.set_pos(newX, app.y);
   }
-
   if (inc === 0) {
     // Tell the other pages I'm here
     bc.postMessage('run_increment');
   }
-
   var args = app.args_line.split(',');
   //for (var i = 0; i < args.length; i++) { console.log(`args[${i}]=${args[i]}`); }
-
   function setCaret(elt) {
     var nl = elt.target.value;
     const range = document.createRange();
@@ -204,11 +199,9 @@ if (typeof app.sysname !== "undefined") {
       selection.addRange(range);
     } else elt.target.value = subs.line_number;
   }
-
   async function sleep(nsec) {
     await new Promise(r => setTimeout(r, nsec * 1000));
   }
-
   async function do_load() {
     getElements();
     document.addEventListener("keyup", exit_on_esc);
@@ -245,7 +238,6 @@ if (typeof app.sysname !== "undefined") {
       //console.log(e);
       timeAdjust();
     });
-
     current_line_number.addEventListener("input", (e) => {
       const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
       //console.log(`e.target.value: ${e.target.value}, lh: ${lh}, file_container.scrollTop: ${(e.target.value - 1) * lh}`);
@@ -311,7 +303,6 @@ if (typeof app.sysname !== "undefined") {
 
         nlines += (4 + sub.text.count_lines());
       }
-
       const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
       file_container.scrollTop = (closest_line + 1) * lh;
       current_line_number.value = closest_line + 2;
@@ -325,7 +316,6 @@ if (typeof app.sysname !== "undefined") {
       file_container.scrollTop = file_container.scrollHeight;
       current_line_number.value = subs.line_number;
     });
-
 
     reRun.addEventListener("click", async () => {
       var sre1 = document.getElementById("reSrch").value;
@@ -367,7 +357,6 @@ if (typeof app.sysname !== "undefined") {
       }
     });
 
-
     file_text.addEventListener("focusin", () => {
       //console.log("May plan to update subs.");
       oldText = file_text.innerText;
@@ -385,7 +374,6 @@ if (typeof app.sysname !== "undefined") {
       planTextUpdate = false;
       oldText = "";
     });
-
     file_text.addEventListener("input", () => {
       //console.log("Plan to update subs.");
       planTextUpdate = true;
@@ -401,7 +389,7 @@ function exit_on_esc() {
   }
 }
 
-// Return a time code in the form hh:mm:ss,sss or hh:mm:ss.sss in milliseconds
+// Return a time code in the form hh:mm:ss,sss
 function tc_to_ms(tc) {
   // 
   tc = tc.replace(/,/, ".");
