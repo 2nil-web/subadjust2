@@ -58,7 +58,7 @@ async function read_file(filename) {
       app.set_title(document.title + " - " + basename(filename));
       filepath.value = filename;
       //console.log(`Opening ${filename}`);
-      var subText = await fs.read_to_utf(filename);
+      var subText = await fs.read_txt(filename);
       // Teste s'il y a un BOM et l'enléve
 
       //console.log(subText);
@@ -78,7 +78,7 @@ function real_exit() {
 async function clean_exit() {
   //console.log("clean_exit");
   var actualSubText = file_text.innerText;
-  var readSubText = await fs.read_to_utf(filepath.value);
+  var readSubText = await fs.read_txt(filepath.value);
 
   if (offset.value == "0" && factor.value == "1" && actualSubText == readSubText) real_exit();
   else {
@@ -109,7 +109,7 @@ async function reload_file() {
   //console.log("reload_file");
   //console.log(`offset:${offset.value}, factor:${factor.value}`);
   var actualSubText = file_text.innerText;
-  var reloadedSubText = await fs.read_to_utf(filepath.value);
+  var reloadedSubText = await fs.read_txt(filepath.value);
 
   if (actualSubText != reloadedSubText && !(await gui.msgbox("Your actual modifications will be lost.\nDo you want to keep them ?", 2))) {
     reloadedSubText.parseSubtitles();
