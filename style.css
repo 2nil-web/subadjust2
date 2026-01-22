@@ -36,11 +36,20 @@ label {
   text-align: right;
 }
 
+#fsFile {
+  /* top right bottom left */
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  padding-left: 10px;
+}
+
 #filepath {
   overflow-x: auto;
   resize: none;
   white-space: nowrap;
-  width: 100%;
+  width: 99%;
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
 }
 
 .topnav {
@@ -78,6 +87,8 @@ label {
 fieldset {
   /*margin: 2px 2px 4px 4px;*/
   margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  padding-left: 4px;
 }
 
 input[type='number'] {
@@ -85,17 +96,33 @@ input[type='number'] {
   width: 62px;
 }
 
+#fsGo {
+  width: 356px;
+}
+
+#fsRE {
+  /* top right bottom left */
+  padding: 1px 1px 1px 4px;
+  margin: 0px 0px 0px 0px;
+  width: 98%;
+}
+
 #reSrch {
-  width: 26%;
+  width: 28%;
+  padding: 1px 0px 1px 0px;
+  margin: 0 ;
 }
 
 #reRepl {
   width: 24%;
+  padding: 1px 0px 1px 0px;
+  margin: 0 ;
 }
 
 #reSNxt,#reRep1,#reRun {
   width: 14%;
-  padding: 0;
+  padding: 0px 0px 0px 0px;
+  margin: 0px 0px 0px 0px;
 }
 
 #file_lines {
@@ -153,7 +180,7 @@ input[type='number'] {
   border: 4px solid transparent;
   /*  border: unset;*/
   /* top right bottom left */
-  inset: 380px 4px 4px 4px;
+  inset: 304px 4px 4px 4px;
   line-height: 1em;
   /*top: 110px; right: 8px; left: 8px; bottom: 4px;*/
   overflow-y: auto;

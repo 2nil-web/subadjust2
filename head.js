@@ -57,6 +57,7 @@ async function read_file(filename) {
     if (await fs.exists(filename)) {
       app.set_title(document.title + " - " + basename(filename));
       filepath.value = filename;
+      filepath.scrollLeft = filepath.scrollWidth;
       //console.log(`Opening ${filename}`);
       var subText = await fs.read_txt(filename);
       // Teste s'il y a un BOM et l'enléve
@@ -477,6 +478,10 @@ function re_empty(re) {
   return n;
 }
 
+function trace_lines(tit, s) {
+  console.log(tit+": "+(s.match(/\n/g) || []).length);
+}
+
 String.prototype.srtMatchAllRES = function() {
   // Replace all ";" by "," in the timestamps
   const re0 = /\n\d+:\d+:\d+.\d+[^\S\n]+-->[^\S\n]+\d+:\d+:\d+.\d+\n/g;
@@ -504,8 +509,7 @@ String.prototype.parseSubtitles = function() {
     nlines = 1;
   var sub_arr = [];
 
-  var correctSubText = "",
-    correctSubLines = "";
+  var correctSubText = "";
   for (const sub of m) {
     //console.log(`processing line ${nlines} for ${sub}`);
     var sub1;
@@ -515,12 +519,6 @@ String.prototype.parseSubtitles = function() {
       sub[3] = sub[3].trim();
       sub[4] = sub[4].trim("\n").trim("\r");
 
-      var nline = 3 + sub[4].count_lines();
-      for (var n = nlines; n < nlines + nline; n++) {
-        correctSubLines += n + '\n';
-      }
-
-      nlines += nline;
       correctSubText += (nsubs + 1).toString() + '\n';
       correctSubText += sub[1] + " --> " + sub[2];
       sub1 = {
@@ -540,15 +538,19 @@ String.prototype.parseSubtitles = function() {
     } //else console.log(`{ "error": "Issue with subtitle number ${nsubs} (line: ${line})" }`);
   }
 
-  // Remove last 2 lines of correctSubLines
   //console.log("to_sub rem lines");
   correctSubText = correctSubText.remove_last_empty_lines();
   nlines = correctSubText.count_lines() + 1;
 
-  file_lines.innerHTML = correctSubLines;
+  file_lines.innerHTML="";
+  for (var il=1; il <= nlines; il++) {
+    file_lines.innerHTML += il + '\n';
+  }
+
   file_lines.style.height = nlines.toString() + "em";
   //file_lines.style.width="2em";
   file_text.innerText = correctSubText;
+  trace_lines("correctSubText", correctSubText);
   file_text.style.height = nlines.toString() + "em";
   var fatc = "00:00:00,000",
     latc = "00:00:00,000",
