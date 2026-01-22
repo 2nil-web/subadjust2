@@ -86,15 +86,16 @@ input[type='number'] {
 }
 
 #reSrch {
-  width: 45%;
+  width: 26%;
 }
 
 #reRepl {
-  width: 35%;
+  width: 24%;
 }
 
-#reRun {
-  width: 12%;
+#reSNxt,#reRep1,#reRun {
+  width: 14%;
+  padding: 0;
 }
 
 #file_lines {

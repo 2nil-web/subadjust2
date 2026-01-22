@@ -114,9 +114,14 @@
   <div class="topnav">
     <fieldset style="width: 94%">
       <legend style="" title="See RegExp literal:&#013;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp">Search and replace with javascript RegExp...</legend>
-      <input type="text" id="reSrch" value="/{\\an8}/g" />
+      <input type="text" list="re_list" id="reSrch"/>
+      <datalist id="re_list">
+        <option value="/{\\an8}/g"></option>
+      </datalist>
       <input type="text" id="reRepl" />
-      <input type="button" id="reRun" value="Apply" title="Apply the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not." />
+      <input type="button" id="reSNxt" value="Srch next" title="Search the next occurrence of the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not." />
+      <input type="button" id="reRep1" value="Rep. next" title="Replace only the next occurrence of the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not." />
+      <input type="button" id="reRun" value="Rep. all" title="Replace all the occurrence of the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not." />
     </fieldset>
   </div>
 

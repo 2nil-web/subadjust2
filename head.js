@@ -378,6 +378,16 @@ if (typeof app.sysname !== "undefined") {
       //console.log("Plan to update subs.");
       planTextUpdate = true;
     });
+
+    re_idx=0;
+    function add_re_list (re_v, def=false) {
+      var option = document.createElement('option');
+      option.value = re_v;
+      re_list.appendChild(option);
+      if (def) reSrch.value=re_v;
+    }
+
+    //add_re_list("/{\\\\an8}/g", true);
   }
 
   window.addEventListener("load", do_load);
