@@ -232,13 +232,65 @@ if (typeof app.sysname !== "undefined") {
     if (n < 1 ) n=1;
     maxN=file_text.innerText.count_lines()+1;
     if (n > maxN) n=maxN;
-    //console.log(`N:${n}`);
     getElements();
     const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
     const scrollTop=(n - 1) * lh;
     file_container.scrollTop = scrollTop;
     current_line_number.value = n;
     current_sub_number.value = nextSub(n);
+  }
+
+  function goToSub(n) {
+    if (n < 1 ) n=1;
+    maxN=subs.sub_number;
+    if (n > maxN) n=maxN;
+    getElements();
+    var subn = parseInt(n);
+    var pos = 1;
+
+    if (subn > 1) {
+      const re = new RegExp('\n' + subn + '\n');
+      pos = file_text.innerText.search(re);
+    }
+
+    if (pos != -1) {
+      if (pos == 1) file_container.scrollTop = 1;
+      else {
+        var ln = 1 + parseInt(file_text.innerText.substring(0, pos).count_lines());
+        const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
+        file_container.scrollTop = lh*ln;
+        current_line_number.value = ln + 1;
+      }
+
+      current_sub_number.value = subn;
+    }
+  }
+
+  function goToTime(ms) {
+      getElements();
+      var closest_tc;
+      var closest_ms = tc_to_ms(subs.last_appearance);
+      var closest_line = 0, nlines = 0;
+      console.log(`ms: ${ms}, closest_ms:${closest_ms}, subs.first_appearance:${subs.first_appearance}, subs.last_appearance:${subs.last_appearance}`);
+
+      for (sub of subs.subtitles) {
+        var curr_ms = tc_to_ms(sub.appearance);
+        var diff_ms = ms - curr_ms;
+        if (diff_ms < 0) break;
+
+        if (closest_ms > diff_ms) {
+          closest_ms = curr_ms;
+          closest_tc = sub.appearance;
+          closest_line = nlines;
+        }
+
+        nlines += (4 + sub.text.count_lines());
+      }
+
+      console.log(`closest_ms:${closest_ms}, closest_tc:${closest_tc}, closest_line:${closest_line}`);
+      const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
+      file_container.scrollTop = (closest_line + 1) * lh;
+      current_line_number.value = closest_line + 2;
   }
 
   async function do_load() {
@@ -277,64 +329,19 @@ if (typeof app.sysname !== "undefined") {
       //console.log(e);
       timeAdjust();
     });
-    current_line_number.addEventListener("input", (e) => {
-      goToLine(e.target.value);
-      setCaret(e);
-      e.target.focus();
-    });
 
-    current_line_number.addEventListener("focusout", (e) => {
-      setCaret(e);
-    });
+    current_line_number.addEventListener("input", (e) => { goToLine(e.target.value); setCaret(e); e.target.focus(); });
+    current_line_number.addEventListener("focusout", (e) => { setCaret(e); });
+
+    current_sub_number.addEventListener("input", (e) => { goToSub(e.target.value); setCaret(e); e.target.focus(); });
+    current_sub_number.addEventListener("focusout", (e) => { setCaret(e); });
 
     toTop.addEventListener("click", () => { goToLine(1); });
     toMiddleLine.addEventListener("click", () => { goToLine(file_text.innerText.count_lines()/2); });
 
-    toMiddleSub.addEventListener("click", () => {
-      getElements();
-      var subn = parseInt(subs.sub_number / 2);
-      const re = new RegExp('\n' + subn + '\n');
-      var pos = file_text.innerText.search(re);
+    toMiddleSub.addEventListener("click", () => { goToSub(subs.sub_number / 2); });
 
-      if (pos != -1) {
-        var ln = 1 + parseInt(file_text.innerText.substring(0, pos).count_lines());
-        const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
-        //console.log(`Midlle sub number: ${subn}, character pos: ${pos}, line number: ${ln}, lh: ${lh}`);
-        file_container.scrollTop = ln * lh;
-        //console.log(`current_line_number.value: ${current_line_number}, changing to ${(ln).toString()}`);
-        current_line_number.value = ln + 1;
-      }
-    });
-
-    toMiddleTime.addEventListener("click", () => {
-      getElements();
-      var closest_tc;
-      var closest_ms = tc_to_ms(subs.last_appearance);
-      var mid_ms = (closest_ms + tc_to_ms(subs.first_appearance)) / 2;
-      var closest_line = 0,
-        nlines = 0;
-      //console.log(`AVT mid_ms: ${mid_ms}`);
-
-      for (sub of subs.subtitles) {
-        var curr_ms = tc_to_ms(sub.appearance);
-        var diff_ms = mid_ms - curr_ms;
-        if (diff_ms < 0) break;
-
-        if (closest_ms > diff_ms) {
-          closest_ms = curr_ms;
-          closest_tc = sub.appearance;
-          closest_line = nlines;
-        }
-
-        nlines += (4 + sub.text.count_lines());
-      }
-      const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
-      file_container.scrollTop = (closest_line + 1) * lh;
-      current_line_number.value = closest_line + 2;
-
-      //console.log(`APR closest_tc: ${closest_tc}, closest_ms: ${closest_ms}, closest_line: ${closest_line}`);
-      //console.log("");
-    });
+    toMiddleTime.addEventListener("click", () => { goToTime((tc_to_ms(subs.last_appearance) + tc_to_ms(subs.first_appearance)) / 2); });
 
     toBottom.addEventListener("click", () => {
       goToLine(file_text.innerText.count_lines()+2);
