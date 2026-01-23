@@ -124,14 +124,14 @@ async function open_file() {
   read_file(await gui.opendlg());
 }
 
-var current_line_number;
+var current_line_number, current_sub_number;
 
 function getElements() {
-  //console.log(`typeof current_line_number: ${typeof current_line_number}`);
-
   if (typeof current_line_number === "undefined") {
     current_line_number = document.getElementById("current_line_number");
-    //console.log(`current_line_number: ${current_line_number.value}`);
+  }
+  if (typeof current_sub_number === "undefined") {
+      current_sub_number = document.getElementById("current_sub_number");
   }
 }
 
@@ -203,6 +203,44 @@ if (typeof app.sysname !== "undefined") {
   async function sleep(nsec) {
     await new Promise(r => setTimeout(r, nsec * 1000));
   }
+
+  function searchFromPos(str, re, from = 0) {
+    const index = str.slice(from).search(re);
+    return index === -1 ? -1 : index + from;
+  }
+
+  function getCharPosFromLineNumber(text, nl) {
+    nl--;
+    var currL=0;
+    for (i=0; i < text.length; i++) {
+      if (text[i] == '\n') currL++;
+      if (currL == nl) return i;
+    }
+    return i;
+  }
+
+  function nextSub(n) {
+    const cp=getCharPosFromLineNumber(file_text.innerText, n);
+    var ns;
+    if (cp > 0) ns=file_text.innerText.substring(cp).match(/\n\d+\n/);
+    else ns=file_text.innerText.substring(cp).match(/\d+\n/);
+    if (ns != null) return ns[0].trim();
+    return subs.sub_number;
+  }
+
+  function goToLine(n) {
+    if (n < 1 ) n=1;
+    maxN=file_text.innerText.count_lines()+1;
+    if (n > maxN) n=maxN;
+    //console.log(`N:${n}`);
+    getElements();
+    const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
+    const scrollTop=(n - 1) * lh;
+    file_container.scrollTop = scrollTop;
+    current_line_number.value = n;
+    current_sub_number.value = nextSub(n);
+  }
+
   async function do_load() {
     getElements();
     document.addEventListener("keyup", exit_on_esc);
@@ -240,9 +278,7 @@ if (typeof app.sysname !== "undefined") {
       timeAdjust();
     });
     current_line_number.addEventListener("input", (e) => {
-      const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
-      //console.log(`e.target.value: ${e.target.value}, lh: ${lh}, file_container.scrollTop: ${(e.target.value - 1) * lh}`);
-      file_container.scrollTop = (e.target.value - 1) * lh;
+      goToLine(e.target.value);
       setCaret(e);
       e.target.focus();
     });
@@ -251,20 +287,8 @@ if (typeof app.sysname !== "undefined") {
       setCaret(e);
     });
 
-    toTop.addEventListener("click", (e) => {
-      getElements();
-      file_container.scrollTop = 0;
-      current_line_number.value = "1";
-    });
-
-    toMiddleLine.addEventListener("click", () => {
-      getElements();
-      const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
-      const ln = parseInt((file_container.scrollHeight / 2)) - lh;
-      file_container.scrollTop = ln;
-      //console.log(`Middle line number: ${parseInt(ln / lh)+1}, file_container.scrollHeight: ${file_container.scrollHeight}, file_container.scrollTop = ${ln}`);
-      current_line_number.value = 1 + parseInt(ln / lh);
-    });
+    toTop.addEventListener("click", () => { goToLine(1); });
+    toMiddleLine.addEventListener("click", () => { goToLine(file_text.innerText.count_lines()/2); });
 
     toMiddleSub.addEventListener("click", () => {
       getElements();
@@ -313,9 +337,7 @@ if (typeof app.sysname !== "undefined") {
     });
 
     toBottom.addEventListener("click", () => {
-      getElements();
-      file_container.scrollTop = file_container.scrollHeight;
-      current_line_number.value = subs.line_number;
+      goToLine(file_text.innerText.count_lines()+2);
     });
 
     reRun.addEventListener("click", async () => {
@@ -438,7 +460,7 @@ String.prototype.count_char_occurrence = function(o = '\n') {
   return [...this].reduce((n, c) => c === o ? ++n : n, 0);
 }
 
-String.prototype.count_lines = function(c = '\n') {
+String.prototype.count_lines = function() {
   return this.count_char_occurrence();
 }
 
@@ -477,22 +499,6 @@ function re_empty(re) {
 
   return n;
 }
-
-function trace_lines(tit, s) {
-  console.log(tit+": "+(s.match(/\n/g) || []).length);
-}
-
-String.prototype.srtMatchAllRES = function() {
-  // Replace all ";" by "," in the timestamps
-  const re0 = /\n\d+:\d+:\d+.\d+[^\S\n]+-->[^\S\n]+\d+:\d+:\d+.\d+\n/g;
-  nopoint = this.replaceAll(re0, function(match) {
-    return match.replace(/\./g, ",");
-  });
-  //console.log(nopoint);
-
-  const re = /^\s*(\d+:\d+:\d+,\d+)[^\S\n]+-->[^\S\n]+(\d+:\d+:\d+,\d+)((?:\n(?!\d+:\d+:\d+,\d+\b|\n+\d+$).*)*)/gm;
-  return nopoint.matchAll(re);
-};
 
 String.prototype.srtMatchAll = function() {
   //const re = /^\s*(\d+:\d+:\d+.\d+)[^\S\n]+-->[^\S\n]+(\d+:\d+:\d+.\d+)((?:\n(?!\d+:\d+:\d+.\d+\b|\n+\d+$).*)*)/gm;
@@ -550,7 +556,6 @@ String.prototype.parseSubtitles = function() {
   file_lines.style.height = nlines.toString() + "em";
   //file_lines.style.width="2em";
   file_text.innerText = correctSubText;
-  trace_lines("correctSubText", correctSubText);
   file_text.style.height = nlines.toString() + "em";
   var fatc = "00:00:00,000",
     latc = "00:00:00,000",
@@ -675,4 +680,4 @@ function subAdjust() {
     subs.line_number = nlines - 1;
   }
   //console.log(subs);
-}
+ }
