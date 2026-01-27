@@ -25,7 +25,7 @@
     <textarea readonly id="filepath"></textarea>
   </fieldset>
   <div class="topnav">
-    <fieldset style="width: 350px">
+    <fieldset id="fsAdj">
       <legend align="center"><a onclick="subAdjust()" title="Click to apply to the subtitles your changes in the inputs">Subtitles Adjustment by ...</a></legend>
       <table>
         <tr>
@@ -84,7 +84,7 @@
   </div>
   <div class="topnav">
     <fieldset id="fsGo" >
-      <legend>Go to ...</legend>
+      <legend>Go to</legend>
         <a id="toTop">start</a>
         <fieldset class="inFsGo">
           <legend align="center">Middle ...</legend>
@@ -94,7 +94,7 @@
         </fieldset>
         <a id="toBottom">end</a>
         <fieldset class="inFsGo">
-          <legend align="center">Value ...</legend>
+          <legend align="center">Line, sub or time value ...</legend>
         <input id="current_line_number" type="number" class"smallnum" step="1" value="1" min="1" max="99999" />
         <input id="current_sub_number" type="number" class"smallnum" step="1" value="1" min="1" max="99999" />
         <!--input id="current_sub_time" type="number" class"smallnum" step="1" value="1" min="1" max="99999" /-->
@@ -104,16 +104,17 @@
   </div>
 
   <div class="topnav">
-    <fieldset id="fsRE">
-      <legend style="" title="See RegExp literal:&#013;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp">Search and replace with javascript RegExp...</legend>
+    <fieldset id="fsRe">
+      <legend style="" title="Search and replace with javascript RegExp (See RegExp literal:&#013;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp)">Edit</legend>
       <input type="text" list="re_list" id="reSrch" value="/{\\an8}/g"/>
       <datalist id="re_list">
         <option value="/{\\an8}/g"></option>
       </datalist>
       <input type="text" id="reRepl" />
-      <input disabled type="button" id="reSNxt" value="Srch next" title="[ToDo] Search the next occurrence of the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not." />
-      <input disabled type="button" id="reRep1" value="Rep next" title="[ToDo] Replace only the next occurrence of the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not." />
-      <input type="button" id="reRun" value="Rep all" title="Replace all the occurrence of the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not." />
+      <input disabled type="button" id="reSNxt" value="Search next" title="[ToDo] Search the next occurrence of the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not." />
+      <input disabled type="button" id="reRep1" value="Replace next" title="[ToDo] Replace only the next occurrence of the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not." />
+      <input type="button" id="reRun" value="Replace all" title="Replace all the occurrence of the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not." />
+      <input disabled type="button" id="remLast" value="Remove last sub" title="ToDo"/>
     </fieldset>
   </div>
 

@@ -97,7 +97,7 @@ input[type='number'] {
 }
 
 #fsGo {
-  width: 356px;
+  width: 350px;
 }
 
 .inFsGo {
@@ -121,29 +121,33 @@ input[type='number'] {
   width: 46px;
 }
 
-#fsRE {
+#fsFile,#fsAdj,#fsGo,#fsRe {
   /* top right bottom left */
   padding: 1px 1px 1px 4px;
   margin: 0px 0px 0px 0px;
-  width: 98%;
+  width: 370px;
 }
 
 #reSrch {
-  width: 28%;
+  width: 40%;
   padding: 1px 0px 1px 0px;
   margin: 0 ;
 }
 
 #reRepl {
-  width: 24%;
+  width: 36%;
   padding: 1px 0px 1px 0px;
   margin: 0 ;
 }
 
 #reSNxt,#reRep1,#reRun {
-  width: 14%;
+  width: 20%;
   padding: 0px 0px 0px 0px;
-  margin: 0px 0px 0px 0px;
+  margin: 0px 0px 4px 0px;
+}
+
+#remLast {
+  float: right;
 }
 
 #file_lines {
@@ -201,7 +205,7 @@ input[type='number'] {
   border: 4px solid transparent;
   /*  border: unset;*/
   /* top right bottom left */
-  inset: 344px 4px 4px 4px;
+  inset: 376px 4px 4px 4px;
   line-height: 1em;
   /*top: 110px; right: 8px; left: 8px; bottom: 4px;*/
   overflow-y: auto;

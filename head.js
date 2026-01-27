@@ -353,10 +353,14 @@ if (typeof app.sysname !== "undefined") {
     current_sub_number.addEventListener("focusout", (e) => { setCaret(e); });
 
     current_sub_time.addEventListener("input", (e) => {
-      console.log(e.target.value);
-      console.log(tc_to_ms(e.target.value+"00,000"));
-      goToTime(tc_to_ms(e.target.value+"00,000"));
-      //setCaret(e); e.target.focus();
+      console.log(" T:"+e.target.value);
+      s=e.target.value+",000";
+      console.log(" S:"+s);
+      ms=tc_to_ms(s);
+      console.log("MS:"+ms);
+      goToTime(ms+1000);
+      //setCaret(e);
+      e.target.focus();
     });
     //current_sub_time.addEventListener("focusout", (e) => { setCaret(e); });
 
