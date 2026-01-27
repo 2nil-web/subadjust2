@@ -85,31 +85,21 @@
   <div class="topnav">
     <fieldset id="fsGo" >
       <legend>Go to ...</legend>
-      <table>
-        <tr>
-          <td>
-            <a id="toTop" accesskey="s"><u>s</u>tart</a>
-          </td>
-          <td align="center">
-            <fieldset style="width:110px">
-              <legend align="center">Middle ...</legend>
-              <a id="toMiddleLine" accesskey="L"><u>l</u>ine</a>
-              <a id="toMiddleSub" accesskey="u">s<u>u</u>b</a>
-              <a id="toMiddleTime" accesskey="t"><u>t</u>ime</a>
-            </fieldset>
-          </td>
-          <td style="margin-left:0">
-            <a id="toBottom" accesskey="e" style="margin-left: 0">end</a>
-          <td>
-            <label for="current_line_number">Line</label><br/>
-            <label for="current_sub_number">Sub</label>
-          </td>
-          <td>
-            <input id="current_line_number" type="number" step="1" value="1" min="1" max="99999" /><br/>
-            <input id="current_sub_number" type="number" step="1" value="1" min="1" max="99999" />&nbsp;
-          </td>
-        </tr>
-      </table>
+        <a id="toTop">start</a>
+        <fieldset class="inFsGo">
+          <legend align="center">Middle ...</legend>
+          <a id="toMiddleLine">line</a>
+          <a id="toMiddleSub">sub</a>
+          <a id="toMiddleTime">time</a>
+        </fieldset>
+        <a id="toBottom">end</a>
+        <fieldset class="inFsGo">
+          <legend align="center">Value ...</legend>
+        <input id="current_line_number" type="number" class"smallnum" step="1" value="1" min="1" max="99999" />
+        <input id="current_sub_number" type="number" class"smallnum" step="1" value="1" min="1" max="99999" />
+        <!--input id="current_sub_time" type="number" class"smallnum" step="1" value="1" min="1" max="99999" /-->
+        <input id="current_sub_time" type="time" step="1" value="00:00:00" />
+      </fieldset>
     </fieldset>
   </div>
 

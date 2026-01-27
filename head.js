@@ -228,6 +228,16 @@ if (typeof app.sysname !== "undefined") {
     return subs.sub_number;
   }
 
+  function nextTime(n) {
+    const cp=getCharPosFromLineNumber(file_text.innerText, n);
+    var nt;
+    if (cp > 0) nt=file_text.innerText.substring(cp).match(/\n(\d\d:\d\d:\d\d).\d\d\d --> \d\d:\d\d:\d\d.\d\d\d\n/);
+    else nt=file_text.innerText.substring(cp).match(/(\d\d:\d\d:\d\d).\d\d\d --> \d\d:\d\d:\d\d.\d\d\d\n/);
+    //console.log(nt);
+    if (nt != null) return nt[1].trim();
+    return subs.last_appearance.replace(/\..*/, "").replace(/,.*/, "");
+  }
+
   function goToLine(n) {
     if (n < 1 ) n=1;
     maxN=file_text.innerText.count_lines()+1;
@@ -238,6 +248,8 @@ if (typeof app.sysname !== "undefined") {
     file_container.scrollTop = scrollTop;
     current_line_number.value = n;
     current_sub_number.value = nextSub(n);
+    current_sub_time.value=nextTime(n);
+    //console.log(`current_sub_number:${current_sub_number.value}, current_sub_time:${current_sub_time.value}`);
   }
 
   function goToSub(n) {
@@ -262,6 +274,7 @@ if (typeof app.sysname !== "undefined") {
         current_line_number.value = ln + 1;
       }
 
+      current_sub_time.value=nextTime(current_line_number.value);
       current_sub_number.value = subn;
     }
   }
@@ -271,26 +284,29 @@ if (typeof app.sysname !== "undefined") {
       var closest_tc;
       var closest_ms = tc_to_ms(subs.last_appearance);
       var closest_line = 0, nlines = 0;
-      console.log(`ms: ${ms}, closest_ms:${closest_ms}, subs.first_appearance:${subs.first_appearance}, subs.last_appearance:${subs.last_appearance}`);
+      //console.log(`AVT ms: ${ms}, closest_ms:${closest_ms}, subs.first_appearance:${subs.first_appearance} (${tc_to_ms(subs.first_appearance)}), subs.last_appearance:${subs.last_appearance} (${tc_to_ms(subs.last_appearance)})`);
 
       for (sub of subs.subtitles) {
         var curr_ms = tc_to_ms(sub.appearance);
         var diff_ms = ms - curr_ms;
-        if (diff_ms < 0) break;
+        //console.log(`SRCH ms:${ms}, curr_ms:${curr_ms}, diff_ms:${diff_ms}, subs.appearance:${sub.appearance}`);
 
-        if (closest_ms > diff_ms) {
-          closest_ms = curr_ms;
-          closest_tc = sub.appearance;
-          closest_line = nlines;
+        if (diff_ms < 0)  {
+          //console.log(`BREAK closest_ms:${closest_ms}, closest_tc:${closest_tc}, closest_line:${closest_line}`);
+          break;
         }
 
+        closest_ms = curr_ms;
+        closest_tc = sub.appearance;
+        closest_line = nlines;
         nlines += (4 + sub.text.count_lines());
       }
 
-      console.log(`closest_ms:${closest_ms}, closest_tc:${closest_tc}, closest_line:${closest_line}`);
+      //console.log(`APR closest_ms:${closest_ms}, closest_tc:${closest_tc}, closest_line:${closest_line}`);
       const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
       file_container.scrollTop = (closest_line + 1) * lh;
       current_line_number.value = closest_line + 2;
+      current_sub_time.value=nextTime(current_line_number.value);
   }
 
   async function do_load() {
@@ -315,7 +331,7 @@ if (typeof app.sysname !== "undefined") {
     });
 
     end_time.addEventListener("change", (e) => {
-      //console.log(e);
+      console.log("To end");
       coeffAdjust();
     });
 
@@ -335,6 +351,14 @@ if (typeof app.sysname !== "undefined") {
 
     current_sub_number.addEventListener("input", (e) => { goToSub(e.target.value); setCaret(e); e.target.focus(); });
     current_sub_number.addEventListener("focusout", (e) => { setCaret(e); });
+
+    current_sub_time.addEventListener("input", (e) => {
+      console.log(e.target.value);
+      console.log(tc_to_ms(e.target.value+"00,000"));
+      goToTime(tc_to_ms(e.target.value+"00,000"));
+      //setCaret(e); e.target.focus();
+    });
+    //current_sub_time.addEventListener("focusout", (e) => { setCaret(e); });
 
     toTop.addEventListener("click", () => { goToLine(1); });
     toMiddleLine.addEventListener("click", () => { goToLine(file_text.innerText.count_lines()/2); });
@@ -446,7 +470,7 @@ function tc_to_ms(tc) {
 }
 
 /* Replaced by new Date(ms).toISOString().slice(11, 23)
- * Millisecond to time code correct for integer number up to 100 hours (3 600 000 000)
+ * Millisecond to time code correct for integer number up to 100 hours (3 600 000 000) */
 function ms_to_tc(ms) {
   // Pad number with 0 to obtain a string of 9 characters long
   var s = ms.toString();
@@ -460,7 +484,7 @@ function ms_to_tc(ms) {
   var tc = m[1] / 3600 + ':' + m[2] / 60 + ':' + m[3] + ',' + m[4];
 
   return tc;
-}*/
+}
 
 
 String.prototype.count_char_occurrence = function(o = '\n') {

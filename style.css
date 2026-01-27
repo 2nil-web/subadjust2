@@ -87,7 +87,7 @@ label {
 fieldset {
   /*margin: 2px 2px 4px 4px;*/
   margin: 0px 0px 0px 0px;
-  padding: 0px 0px 0px 0px;
+  padding: 0px 0px 2px 0px;
   padding-left: 4px;
 }
 
@@ -98,6 +98,27 @@ input[type='number'] {
 
 #fsGo {
   width: 356px;
+}
+
+.inFsGo {
+  width: 200px;
+}
+
+#toMiddleLine,#toMiddleSub,#toMiddleTime,
+#toTop,#toBottom
+{
+  width: 40px;
+}
+#toTop,#toBottom
+{
+  margin-top: 14px;
+  margin-left: 40px;
+  margin-right: 10px;
+}
+
+#current_line_number,#current_sub_number/*,#current_sub_time*/
+{
+  width: 46px;
 }
 
 #fsRE {
@@ -180,7 +201,7 @@ input[type='number'] {
   border: 4px solid transparent;
   /*  border: unset;*/
   /* top right bottom left */
-  inset: 304px 4px 4px 4px;
+  inset: 344px 4px 4px 4px;
   line-height: 1em;
   /*top: 110px; right: 8px; left: 8px; bottom: 4px;*/
   overflow-y: auto;
