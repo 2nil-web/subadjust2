@@ -112,8 +112,9 @@ async function reload_file() {
   var actualSubText = file_text.innerText;
   var reloadedSubText = await fs.read_txt(filepath.value);
 
-  if (actualSubText != reloadedSubText && !(await gui.msgbox("Your actual modifications will be lost.\nDo you want to keep them ?", 2))) {
-    reloadedSubText.parseSubtitles();
+  if (actualSubText != reloadedSubText) {
+    const rep=(await gui.msgbox("Actual modifications will be lost.\nIs that OK ?", 2));
+    if (rep == "yes") reloadedSubText.parseSubtitles();
   }
 }
 
