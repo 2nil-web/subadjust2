@@ -33,14 +33,14 @@ async function write_file(filepath) {
   });
 
   await fs.write(filepath, no_dots);
-  file_text.innerText=no_dots;
+  file_text.innerText = no_dots;
 }
 
 // *fs.write: at least 1 parameter, truncate and write to the file who's name is provided as the first parameter, the content of all the following parameters, return true if the operation was OK, else false.
 async function save_file() {
-  load_img.style.display="block";
+  load_img.style.display = "block";
   await write_file(filepath.value);
-  load_img.style.display="none";
+  load_img.style.display = "none";
 }
 
 async function saveas_file() {
@@ -85,25 +85,25 @@ async function clean_exit() {
   else {
     // Disable esc_on_exit which may interfer with esc on alert
     document.removeEventListener("keyup", exit_on_esc);
-    var res=await gui.msgbox("Do you want to save your current changes to the file before leaving ?", 3);
+    var res = await gui.msgbox("Do you want to save your current changes to the file before leaving ?", 3);
     switch (res) {
-     case "yes":
-      await save_file();
-      real_exit();
-      break;
-     case "no":
-      //console.log("Not saving before exit: ");
-      real_exit();
-      break;
-     case "cancel":
-      //console.log("Aborting exit: ");
-      break;
-   }
+      case "yes":
+        await save_file();
+        real_exit();
+        break;
+      case "no":
+        //console.log("Not saving before exit: ");
+        real_exit();
+        break;
+      case "cancel":
+        //console.log("Aborting exit: ");
+        break;
+    }
 
     // Re-enable esc_on_exit
     await new Promise(r => setTimeout(r, 400));
     document.addEventListener("keyup", exit_on_esc);
- }
+  }
 }
 
 async function reload_file() {
@@ -131,7 +131,7 @@ function getElements() {
     current_line_number = document.getElementById("current_line_number");
   }
   if (typeof current_sub_number === "undefined") {
-      current_sub_number = document.getElementById("current_sub_number");
+    current_sub_number = document.getElementById("current_sub_number");
   }
 }
 
@@ -188,7 +188,18 @@ if (typeof app.sysname !== "undefined") {
   }
   var args = app.args_line.split(',');
   //for (var i = 0; i < args.length; i++) { console.log(`args[${i}]=${args[i]}`); }
+
+  function getCursorPos(elt) {
+        //elt.focus();
+        let _range = document.getSelection().getRangeAt(0);
+        let range = _range.cloneRange();
+        range.selectNodeContents(elt);
+        range.setEnd(_range.endContainer, _range.endOffset);
+        return range.toString().length;
+  }  
+
   function setCaret(elt) {
+    return;
     var nl = elt.target.value;
     const range = document.createRange();
     const selection = window.getSelection();
@@ -211,8 +222,8 @@ if (typeof app.sysname !== "undefined") {
 
   function getCharPosFromLineNumber(text, nl) {
     nl--;
-    var currL=0;
-    for (i=0; i < text.length; i++) {
+    var currL = 0;
+    for (i = 0; i < text.length; i++) {
       if (text[i] == '\n') currL++;
       if (currL == nl) return i;
     }
@@ -220,42 +231,42 @@ if (typeof app.sysname !== "undefined") {
   }
 
   function nextSub(n) {
-    const cp=getCharPosFromLineNumber(file_text.innerText, n);
+    const cp = getCharPosFromLineNumber(file_text.innerText, n);
     var ns;
-    if (cp > 0) ns=file_text.innerText.substring(cp).match(/\n\d+\n/);
-    else ns=file_text.innerText.substring(cp).match(/\d+\n/);
+    if (cp > 0) ns = file_text.innerText.substring(cp).match(/\n\d+\n/);
+    else ns = file_text.innerText.substring(cp).match(/\d+\n/);
     if (ns != null) return ns[0].trim();
     return subs.sub_number;
   }
 
   function nextTime(n) {
-    const cp=getCharPosFromLineNumber(file_text.innerText, n);
+    const cp = getCharPosFromLineNumber(file_text.innerText, n);
     var nt;
-    if (cp > 0) nt=file_text.innerText.substring(cp).match(/\n(\d\d:\d\d:\d\d).\d\d\d --> \d\d:\d\d:\d\d.\d\d\d\n/);
-    else nt=file_text.innerText.substring(cp).match(/(\d\d:\d\d:\d\d).\d\d\d --> \d\d:\d\d:\d\d.\d\d\d\n/);
+    if (cp > 0) nt = file_text.innerText.substring(cp).match(/\n(\d\d:\d\d:\d\d).\d\d\d --> \d\d:\d\d:\d\d.\d\d\d\n/);
+    else nt = file_text.innerText.substring(cp).match(/(\d\d:\d\d:\d\d).\d\d\d --> \d\d:\d\d:\d\d.\d\d\d\n/);
     //console.log(nt);
     if (nt != null) return nt[1].trim();
     return subs.last_appearance.replace(/\..*/, "").replace(/,.*/, "");
   }
 
   function goToLine(n) {
-    if (n < 1 ) n=1;
-    maxN=file_text.innerText.count_lines()+1;
-    if (n > maxN) n=maxN;
+    if (n < 1) n = 1;
+    maxN = file_text.innerText.count_lines() + 1;
+    if (n > maxN) n = maxN;
     getElements();
     const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
-    const scrollTop=(n - 1) * lh;
+    const scrollTop = (n - 1) * lh;
     file_container.scrollTop = scrollTop;
     current_line_number.value = n;
     current_sub_number.value = nextSub(n);
-    current_sub_time.value=nextTime(n);
+    current_sub_time.value = nextTime(n);
     //console.log(`current_sub_number:${current_sub_number.value}, current_sub_time:${current_sub_time.value}`);
   }
 
   function goToSub(n) {
-    if (n < 1 ) n=1;
-    maxN=subs.sub_number;
-    if (n > maxN) n=maxN;
+    if (n < 1) n = 1;
+    maxN = subs.sub_number;
+    if (n > maxN) n = maxN;
     getElements();
     var subn = parseInt(n);
     var pos = 1;
@@ -270,43 +281,50 @@ if (typeof app.sysname !== "undefined") {
       else {
         var ln = 1 + parseInt(file_text.innerText.substring(0, pos).count_lines());
         const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
-        file_container.scrollTop = lh*ln;
+        file_container.scrollTop = lh * ln;
         current_line_number.value = ln + 1;
       }
 
-      current_sub_time.value=nextTime(current_line_number.value);
+      current_sub_time.value = nextTime(current_line_number.value);
       current_sub_number.value = subn;
     }
   }
 
   function goToTime(ms) {
-      getElements();
-      var closest_tc;
-      var closest_ms = tc_to_ms(subs.last_appearance);
-      var closest_line = 0, nlines = 0;
-      //console.log(`AVT ms: ${ms}, closest_ms:${closest_ms}, subs.first_appearance:${subs.first_appearance} (${tc_to_ms(subs.first_appearance)}), subs.last_appearance:${subs.last_appearance} (${tc_to_ms(subs.last_appearance)})`);
+    getElements();
+    var closest_tc;
+    var closest_ms = tc_to_ms(subs.last_appearance);
+    var closest_line = 0,
+      nlines = 0;
+    //console.log(`AVT ms: ${ms}, closest_ms:${closest_ms}, subs.first_appearance:${subs.first_appearance} (${tc_to_ms(subs.first_appearance)}), subs.last_appearance:${subs.last_appearance} (${tc_to_ms(subs.last_appearance)})`);
 
-      for (sub of subs.subtitles) {
-        var curr_ms = tc_to_ms(sub.appearance);
-        var diff_ms = ms - curr_ms;
-        //console.log(`SRCH ms:${ms}, curr_ms:${curr_ms}, diff_ms:${diff_ms}, subs.appearance:${sub.appearance}`);
+    for (sub of subs.subtitles) {
+      var curr_ms = tc_to_ms(sub.appearance);
+      var diff_ms = ms - curr_ms;
+      //console.log(`SRCH ms:${ms}, curr_ms:${curr_ms}, diff_ms:${diff_ms}, subs.appearance:${sub.appearance}`);
 
-        if (diff_ms < 0)  {
-          //console.log(`BREAK closest_ms:${closest_ms}, closest_tc:${closest_tc}, closest_line:${closest_line}`);
-          break;
-        }
-
-        closest_ms = curr_ms;
-        closest_tc = sub.appearance;
-        closest_line = nlines;
-        nlines += (4 + sub.text.count_lines());
+      if (diff_ms < 0) {
+        //console.log(`BREAK closest_ms:${closest_ms}, closest_tc:${closest_tc}, closest_line:${closest_line}`);
+        break;
       }
 
-      //console.log(`APR closest_ms:${closest_ms}, closest_tc:${closest_tc}, closest_line:${closest_line}`);
-      const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
-      file_container.scrollTop = (closest_line + 1) * lh;
-      current_line_number.value = closest_line + 2;
-      current_sub_time.value=nextTime(current_line_number.value);
+      closest_ms = curr_ms;
+      closest_tc = sub.appearance;
+      closest_line = nlines;
+      nlines += (4 + sub.text.count_lines());
+    }
+
+    //console.log(`APR closest_ms:${closest_ms}, closest_tc:${closest_tc}, closest_line:${closest_line}`);
+    const lh = parseInt(window.getComputedStyle(file_container, null).getPropertyValue("line-height"));
+    file_container.scrollTop = (closest_line + 1) * lh;
+    current_line_number.value = closest_line + 2;
+    current_sub_time.value = nextTime(current_line_number.value);
+  }
+
+  async function sub_searchNext() {
+  }
+
+  async function sub_replace() {
   }
 
   async function do_load() {
@@ -346,39 +364,57 @@ if (typeof app.sysname !== "undefined") {
       timeAdjust();
     });
 
-    current_line_number.addEventListener("input", (e) => { goToLine(e.target.value); setCaret(e); e.target.focus(); });
-    current_line_number.addEventListener("focusout", (e) => { setCaret(e); });
+    current_line_number.addEventListener("input", (e) => {
+      goToLine(e.target.value);
+      setCaret(e);
+      e.target.focus();
+    });
+    current_line_number.addEventListener("focusout", (e) => {
+      setCaret(e);
+    });
 
-    current_sub_number.addEventListener("input", (e) => { goToSub(e.target.value); setCaret(e); e.target.focus(); });
-    current_sub_number.addEventListener("focusout", (e) => { setCaret(e); });
+    current_sub_number.addEventListener("input", (e) => {
+      goToSub(e.target.value);
+      setCaret(e);
+      e.target.focus();
+    });
+    current_sub_number.addEventListener("focusout", (e) => {
+      setCaret(e);
+    });
 
     current_sub_time.addEventListener("input", (e) => {
-      console.log(" T:"+e.target.value);
-      s=e.target.value+",000";
-      console.log(" S:"+s);
-      ms=tc_to_ms(s);
-      console.log("MS:"+ms);
-      goToTime(ms+1000);
+      console.log(" T:" + e.target.value);
+      s = e.target.value + ",000";
+      console.log(" S:" + s);
+      ms = tc_to_ms(s);
+      console.log("MS:" + ms);
+      goToTime(ms + 1000);
       //setCaret(e);
       e.target.focus();
     });
     //current_sub_time.addEventListener("focusout", (e) => { setCaret(e); });
 
-    toTop.addEventListener("click", () => { goToLine(1); });
-    toMiddleLine.addEventListener("click", () => { goToLine(file_text.innerText.count_lines()/2); });
+    toTop.addEventListener("click", () => {
+      goToLine(1);
+    });
+    toMiddleLine.addEventListener("click", () => {
+      goToLine(file_text.innerText.count_lines() / 2);
+    });
 
-    toMiddleSub.addEventListener("click", () => { goToSub(subs.sub_number / 2); });
+    toMiddleSub.addEventListener("click", () => {
+      goToSub(subs.sub_number / 2);
+    });
 
-    toMiddleTime.addEventListener("click", () => { goToTime((tc_to_ms(subs.last_appearance) + tc_to_ms(subs.first_appearance)) / 2); });
+    toMiddleTime.addEventListener("click", () => {
+      goToTime((tc_to_ms(subs.last_appearance) + tc_to_ms(subs.first_appearance)) / 2);
+    });
 
     toBottom.addEventListener("click", () => {
-      goToLine(file_text.innerText.count_lines()+2);
+      goToLine(file_text.innerText.count_lines() + 2);
     });
 
     reRun.addEventListener("click", async () => {
       var sre1 = document.getElementById("reSrch").value;
-      //console.log(`sre1: ${sre1}`);
-
       var re = sre1.match(/^\/(.*)\/(.*)/);
       var str, flg = "";
 
@@ -389,41 +425,53 @@ if (typeof app.sysname !== "undefined") {
         flg = re[2];
       }
 
-      //console.log(`str: ${str}`);
-      //console.log(`flg: ${flg}`);
       var re1 = new RegExp(str, flg);
       var re2 = document.getElementById("reRepl").value;
-
-      //console.log(`re1: ${re1}`);
-      //console.log(`re2: ${re2}`);
-
       var orig = document.getElementById("file_text").innerText;
       var res = orig.replace(re1, re2);
 
       if (res != orig) {
-        //console.log("RegExp modif OK");
         file_container.classList.add("blink_ok");
         document.getElementById("file_text").innerText = res;
         await sleep(2);
         file_container.classList.remove("blink_ok");
       } else {
-        //console.log("RegExp modif KO");
         file_container.classList.add("blink_ko");
         await sleep(2);
         file_container.classList.remove("blink_ko");
-        //gui.msgbox("No change");
       }
     });
 
-    file_text.addEventListener("focusin", () => {
-      //console.log("May plan to update subs.");
+    var undo_rem=[];
+    // Remove last subtitle
+    remLast.addEventListener("click", async () => {
+      const re=new RegExp(/(\d+)\n(\d\d:\d\d:\d\d.\d\d\d --> \d\d:\d\d:\d\d.\d\d\d)/, 'g');
+      let lastOcc;
+      let lastIdx=-1;
+      while ((mtch = re.exec(file_text.innerText)) !== null) {
+        lastOcc = mtch;
+      }
+      
+      if (lastOcc !== null) {
+        undo_rem.push(file_text.innerText.substring(lastOcc.index).trim());
+        file_text.innerText=file_text.innerText.substring(0, lastOcc.index).trim();
+        goToLine(file_text.innerText.count_lines()-2);
+      }
+    });
+
+    // Restore previous removal of last subtitle
+    undoRem.addEventListener("click", async () => {
+      var last_rem=undo_rem.pop();
+      if (last_rem !== undefined) file_text.innerText+="\n\n"+last_rem;
+        goToLine(file_text.innerText.count_lines()-2);
+    });
+
+    file_text.addEventListener("focusin", (e) => {
       oldText = file_text.innerText;
     });
 
     file_text.addEventListener("focusout", () => {
       if (planTextUpdate && oldText !== file_text.innerText) {
-        //console.log("Effective subs updating.");
-        //console.log("Call parseSubtitles from line 293");
         file_text.innerText.parseSubtitles();
       } else {
         //console.log("Not necessary to update subs.");
@@ -437,12 +485,13 @@ if (typeof app.sysname !== "undefined") {
       planTextUpdate = true;
     });
 
-    re_idx=0;
-    function add_re_list (re_v, def=false) {
+    re_idx = 0;
+
+    function add_re_list(re_v, def = false) {
       var option = document.createElement('option');
       option.value = re_v;
       re_list.appendChild(option);
-      if (def) reSrch.value=re_v;
+      if (def) reSrch.value = re_v;
     }
 
     //add_re_list("/{\\\\an8}/g", true);
@@ -583,8 +632,8 @@ String.prototype.parseSubtitles = function() {
   correctSubText = correctSubText.remove_last_empty_lines();
   nlines = correctSubText.count_lines() + 1;
 
-  file_lines.innerHTML="";
-  for (var il=1; il <= nlines; il++) {
+  file_lines.innerHTML = "";
+  for (var il = 1; il <= nlines; il++) {
     file_lines.innerHTML += il + '\n';
   }
 
@@ -715,4 +764,4 @@ function subAdjust() {
     subs.line_number = nlines - 1;
   }
   //console.log(subs);
- }
+}
