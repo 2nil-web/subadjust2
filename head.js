@@ -113,7 +113,7 @@ async function reload_file() {
   var reloadedSubText = await fs.read_txt(filepath.value);
 
   if (actualSubText != reloadedSubText) {
-    const rep=(await gui.msgbox("Actual modifications will be lost.\nIs that OK ?", 2));
+    const rep = (await gui.msgbox("Actual modifications will be lost.\nIs that OK ?", 2));
     if (rep == "yes") reloadedSubText.parseSubtitles();
   }
 }
@@ -190,14 +190,26 @@ if (typeof app.sysname !== "undefined") {
   var args = app.args_line.split(',');
   //for (var i = 0; i < args.length; i++) { console.log(`args[${i}]=${args[i]}`); }
 
+  function setCursorPos(elt, l, c) {
+    const element = document.getElementById("file_text")
+    const range = document.createRange()
+    const selection = window.getSelection()
+
+    range.setStart(element.childNodes[l], c)
+    range.collapse(true)
+
+    selection.removeAllRanges()
+    selection.addRange(range)
+  }
+
   function getCursorPos(elt) {
-        //elt.focus();
-        let _range = document.getSelection().getRangeAt(0);
-        let range = _range.cloneRange();
-        range.selectNodeContents(elt);
-        range.setEnd(_range.endContainer, _range.endOffset);
-        return range.toString().length;
-  }  
+    //elt.focus();
+    let _range = document.getSelection().getRangeAt(0);
+    let range = _range.cloneRange();
+    range.selectNodeContents(elt);
+    range.setEnd(_range.endContainer, _range.endOffset);
+    return range.toString().length;
+  }
 
   function setCaret(elt) {
     return;
@@ -261,6 +273,8 @@ if (typeof app.sysname !== "undefined") {
     current_line_number.value = n;
     current_sub_number.value = nextSub(n);
     current_sub_time.value = nextTime(n);
+    //file_text.focus();
+    setCursorPos(n, 1);
     //console.log(`current_sub_number:${current_sub_number.value}, current_sub_time:${current_sub_time.value}`);
   }
 
@@ -322,11 +336,9 @@ if (typeof app.sysname !== "undefined") {
     current_sub_time.value = nextTime(current_line_number.value);
   }
 
-  async function sub_searchNext() {
-  }
+  async function sub_searchNext() {}
 
-  async function sub_replace() {
-  }
+  async function sub_replace() {}
 
   async function do_load() {
     getElements();
@@ -443,28 +455,28 @@ if (typeof app.sysname !== "undefined") {
       }
     });
 
-    var undo_rem=[];
+    var undo_rem = [];
     // Remove last subtitle
     remLast.addEventListener("click", async () => {
-      const re=new RegExp(/(\d+)\n(\d\d:\d\d:\d\d.\d\d\d --> \d\d:\d\d:\d\d.\d\d\d)/, 'g');
+      const re = new RegExp(/(\d+)\n(\d\d:\d\d:\d\d.\d\d\d --> \d\d:\d\d:\d\d.\d\d\d)/, 'g');
       let lastOcc;
-      let lastIdx=-1;
+      let lastIdx = -1;
       while ((mtch = re.exec(file_text.innerText)) !== null) {
         lastOcc = mtch;
       }
-      
+
       if (lastOcc !== null) {
         undo_rem.push(file_text.innerText.substring(lastOcc.index).trim());
-        file_text.innerText=file_text.innerText.substring(0, lastOcc.index).trim();
-        goToLine(file_text.innerText.count_lines()-2);
+        file_text.innerText = file_text.innerText.substring(0, lastOcc.index).trim();
+        goToLine(file_text.innerText.count_lines() - 2);
       }
     });
 
     // Restore previous removal of last subtitle
     undoRem.addEventListener("click", async () => {
-      var last_rem=undo_rem.pop();
-      if (last_rem !== undefined) file_text.innerText+="\n\n"+last_rem;
-        goToLine(file_text.innerText.count_lines()-2);
+      var last_rem = undo_rem.pop();
+      if (last_rem !== undefined) file_text.innerText += "\n\n" + last_rem;
+      goToLine(file_text.innerText.count_lines() - 2);
     });
 
     file_text.addEventListener("focusin", (e) => {
