@@ -458,25 +458,62 @@ if (typeof app.sysname !== "undefined") {
     var undo_rem = [];
     // Remove last subtitle
     remLast.addEventListener("click", async () => {
-      const re = new RegExp(/(\d+)\n(\d\d:\d\d:\d\d.\d\d\d --> \d\d:\d\d:\d\d.\d\d\d)/, 'g');
-      let lastOcc;
-      let lastIdx = -1;
-      while ((mtch = re.exec(file_text.innerText)) !== null) {
-        lastOcc = mtch;
-      }
+      const re = new RegExp(/\d\d:\d\d:\d\d.\d\d\d --> \d\d:\d\d:\d\d.\d\d\d/);
+      let lastOcc, lastPos;
 
-      if (lastOcc !== null) {
-        undo_rem.push(file_text.innerText.substring(lastOcc.index).trim());
-        file_text.innerText = file_text.innerText.substring(0, lastOcc.index).trim();
-        goToLine(file_text.innerText.count_lines() - 2);
-      }
+      var arr_sub=file_text.innerText.split("\n");
+      var arr_lin=file_lines.innerText.split("\n");
+
+      var occ=0;
+      var undo_str="";
+      arr_sub.slice().reverse().some((item, index, array) => {
+        if (re.test(item)) occ++;
+        if (occ === 0) {
+          arr_lin.pop(); undo_str=arr_sub.pop()+"\n"+undo_str;
+          console.log(`J'enlève: ${item}`)
+        } else {
+          console.log(`Je garde: ${item}`)
+        }
+
+        if (occ === 2) {
+          arr_lin.pop(); undo_str=arr_sub.pop()+"\n"+undo_str;
+          arr_lin.pop(); undo_str=arr_sub.pop()+"\n"+undo_str;
+          arr_lin.pop(); undo_str=arr_sub.pop()+"\n"+undo_str;
+          console.log(`Finalement, j'enlève : [${undo_str}]`);
+
+          return true;
+        }
+      });
+      //for (i=0; i < 3; i++) { arr_lin.pop(); undo_str=arr_sub.pop()+"\n"+undo_str; }
+
+      //if (arr_lin.length > arr_sub.length) { arr_lin.pop(); }
+
+      undo_rem.push(undo_str);
+
+      file_text.innerText=arr_sub.join("\n");
+      file_lines.innerText=arr_lin.join("\n");
+
+      goToLine(arr_sub.length);
     });
 
     // Restore previous removal of last subtitle
     undoRem.addEventListener("click", async () => {
-      var last_rem = undo_rem.pop();
-      if (last_rem !== undefined) file_text.innerText += "\n\n" + last_rem;
-      goToLine(file_text.innerText.count_lines() - 2);
+      var nl=file_lines.innerText.split("\n").length;
+      var il=0;
+
+      if (undo_rem.length > 0) {
+        var last_rem = undo_rem.pop();
+        console.log(`Adding: ${last_rem.count_lines()} lines`);
+        console.log(last_rem);
+
+        for (il=1; il <= last_rem.count_lines(); il++) {
+          file_lines.innerText += "\n"+(nl+il);
+        }
+        
+        file_text.innerText += "\n"+last_rem;
+      }
+
+      goToLine(nl+il);
     });
 
     file_text.addEventListener("focusin", (e) => {
@@ -753,8 +790,17 @@ function subAdjust() {
     var lines = "",
       texts = "";
     let nsubs = 1;
+    let n_empty_subs=0;
     let nlines = 0;
+
     for (var sub of subs.subtitles) {
+      // if sub text is empty then remove the current sub
+      if (sub.text === "") {
+        //console.log(`sub empty for number ${nsubs}, ${sub.appearance}/${subs.subtitles[nsubs-1].appearance} ==> ${sub.disappearance}/${subs.subtitles[nsubs-1].disappearance} : [sub.text]`);
+        n_empty_subs++;
+        continue;
+      }
+
       sub_adj(offs, fact, sub);
       //console.log(`${sub.appearance} --> ${sub.disappearance}`);
       lines += `${nsubs}`;
@@ -767,8 +813,11 @@ function subAdjust() {
       for (var n = nlines; n < nlines + nline; n++) {
         lines += n + '\n';
       }
+
       nlines += nline;
     }
+
+    if (n_empty_subs > 0) console.log(`Removed ${n_empty_subs}/${nsubs+n_empty_subs} empty subs, ${nsubs} remaining.`);
 
     //file_lines.innerHTML = lines;
     file_text.innerText = texts;
