@@ -455,45 +455,53 @@ if (typeof app.sysname !== "undefined") {
       }
     });
 
+    function rm_1l (arr_sub) {
+      var ln="", txt=arr_sub.texts.pop();
+      if (arr_sub.lines.length > arr_sub.texts.length) ln=arr_sub.lines.pop();
+      //console.log(`J'enlève: ${ln}: ${txt}`)
+      console.log(`Il y ${arr_sub.texts.length} lignes de texte et ${arr_sub.lines.length} linges de numérotation`);
+
+      arr_sub.undo_str=txt+"\n"+arr_sub.undo_str;
+    }
+
     var undo_rem = [];
     // Remove last subtitle
     remLast.addEventListener("click", async () => {
       const re = new RegExp(/\d\d:\d\d:\d\d.\d\d\d --> \d\d:\d\d:\d\d.\d\d\d/);
       let lastOcc, lastPos;
 
-      var arr_sub=file_text.innerText.split("\n");
-      var arr_lin=file_lines.innerText.split("\n");
+      var arr_sub = { "texts": file_text.innerText.split("\n"), "lines": file_lines.innerText.trim("\n").split("\n"), "undo_str": "" };
+      //console.log(`arr_sub.texts.length: ${arr_sub.texts.length}, arr_sub.lines.length: ${arr_sub.lines.length}`);
 
       var occ=0;
-      var undo_str="";
-      arr_sub.slice().reverse().some((item, index, array) => {
+      arr_sub.texts.slice().reverse().some((item, index, array) => {
         if (re.test(item)) occ++;
         if (occ === 0) {
-          arr_lin.pop(); undo_str=arr_sub.pop()+"\n"+undo_str;
-          console.log(`J'enlève: ${item}`)
+          rm_1l(arr_sub);
         } else {
-          console.log(`Je garde: ${item}`)
+          //console.log(`Je garde: ${item}`)
         }
 
         if (occ === 2) {
-          arr_lin.pop(); undo_str=arr_sub.pop()+"\n"+undo_str;
-          arr_lin.pop(); undo_str=arr_sub.pop()+"\n"+undo_str;
-          arr_lin.pop(); undo_str=arr_sub.pop()+"\n"+undo_str;
-          console.log(`Finalement, j'enlève : [${undo_str}]`);
+          rm_1l(arr_sub);
+          rm_1l(arr_sub);
+          rm_1l(arr_sub);
+          //console.log(`Finalement, j'enlève : [${arr_sub.undo_str}]`);
 
           return true;
         }
       });
-      //for (i=0; i < 3; i++) { arr_lin.pop(); undo_str=arr_sub.pop()+"\n"+undo_str; }
+      //for (i=0; i < 3; i++) { arr_sub.lines.pop(); arr_sub.undo_str=arr_sub.texts.pop()+"\n"+arr_sub.undo_str; }
 
-      //if (arr_lin.length > arr_sub.length) { arr_lin.pop(); }
+      //if (arr_sub.lines.length > arr_sub.texts.length) { arr_sub.lines.pop(); }
 
-      undo_rem.push(undo_str);
+      undo_rem.push(arr_sub.undo_str);
 
-      file_text.innerText=arr_sub.join("\n");
-      file_lines.innerText=arr_lin.join("\n");
+      file_text.innerText=arr_sub.texts.join("\n");
+      file_lines.innerText=arr_sub.lines.join("\n");
+      //console.log(arr_sub.lines);
 
-      goToLine(arr_sub.length);
+      goToLine(arr_sub.texts.length);
     });
 
     // Restore previous removal of last subtitle
@@ -509,8 +517,9 @@ if (typeof app.sysname !== "undefined") {
         for (il=1; il <= last_rem.count_lines(); il++) {
           file_lines.innerText += "\n"+(nl+il);
         }
-        
-        file_text.innerText += "\n"+last_rem;
+
+        if (file_text.innerText.charAt(file_text.innerText.length-1) !== "\n") file_text.innerText += "\n";
+        file_text.innerText += last_rem;
       }
 
       goToLine(nl+il);
