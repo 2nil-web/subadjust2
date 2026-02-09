@@ -340,9 +340,8 @@ if (typeof app.sysname !== "undefined") {
   async function sub_replace() {}
 
   function track_CtrlF(event) {
-    console.log(event);
+    //console.log(event);
     if (event.ctrlKey && event.key === "f") {
-      console.log("The CTRL key + f was pressed!");
       document.removeEventListener("keyup", exit_on_esc);
     } else {
       document.addEventListener("keyup", exit_on_esc);
