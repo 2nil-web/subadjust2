@@ -105,7 +105,7 @@
 
   <div class="topnav">
     <fieldset id="fsRe">
-      <legend style="" title="Search and replace with javascript RegExp (See RegExp literal:&#013;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp)">Edit sub(s)</legend>
+      <legend style="" title="Search and replace with javascript RegExp (See RegExp literal:&#013;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp)">Edit subtitles</legend>
       <div>
         <input type="text" list="re_list" id="reSrch" value="/{\\an8}/g" />
         <datalist id="re_list">
@@ -117,9 +117,9 @@
         <div style="width: 100%; display:flex; justify-content: space-between;">
           <input type="button" id="reRun" value="Replace" title="Replace all the occurrence of the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not." />
           <div>
-            <input type="button" id="remFirst" value="Remove first" title="Remove first subtitle lines" />&nbsp;
-            <input type="button" id="remLast" value="Remove last" title="Remove last subtitle lines" />&nbsp;
-            <input type="button" id="undoRem" value="Undo Remove" title="Undo last remove" />
+            <input type="button" id="remFirst" value="Delete first" title="Remove first subtitle lines" />&nbsp;
+            <input type="button" id="remLast" value="Delete last" title="Remove last subtitle lines" />&nbsp;
+            <input type="button" disabled id="undoRem" value="Undelete" title="Undo last removal" />
           </div>
         </div>
     </fieldset>

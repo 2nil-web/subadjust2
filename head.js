@@ -190,40 +190,6 @@ if (typeof app.sysname !== "undefined") {
   var args = app.args_line.split(',');
   //for (var i = 0; i < args.length; i++) { console.log(`args[${i}]=${args[i]}`); }
 
-  function setCursorPos(elt, l, c) {
-    const element = document.getElementById("file_text")
-    const range = document.createRange()
-    const selection = window.getSelection()
-
-    range.setStart(element.childNodes[l], c)
-    range.collapse(true)
-
-    selection.removeAllRanges()
-    selection.addRange(range)
-  }
-
-  function getCursorPos(elt) {
-    //elt.focus();
-    let _range = document.getSelection().getRangeAt(0);
-    let range = _range.cloneRange();
-    range.selectNodeContents(elt);
-    range.setEnd(_range.endContainer, _range.endOffset);
-    return range.toString().length;
-  }
-
-  function setCaret(elt) {
-    return;
-    var nl = elt.target.value;
-    const range = document.createRange();
-    const selection = window.getSelection();
-
-    if (nl < subs.line_number) {
-      range.setStart(file_text.childNodes[nl], 0);
-      range.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(range);
-    } else elt.target.value = subs.line_number;
-  }
   async function sleep(nsec) {
     await new Promise(r => setTimeout(r, nsec * 1000));
   }
@@ -262,7 +228,39 @@ if (typeof app.sysname !== "undefined") {
     return subs.last_appearance.replace(/\..*/, "").replace(/,.*/, "");
   }
 
-  function goToLine(n) {
+  function setCleanCursorPos(txtNode, c) {
+    sel = getSelection();
+    sel.removeAllRanges();
+    rng = document.createRange();
+    rng.setStart(txtNode, c);
+    rng.setEnd(txtNode, c);
+    sel.addRange(rng);
+  }
+
+  function setCursorPos(elt, lin, col) {
+    var l=2*(lin-1);
+    if (l < 0) l=0;
+    else if (l > elt.childNodes.length-1) l=elt.childNodes.length-1;
+
+    var txtNode = elt.childNodes[l];
+    var c;
+
+    //console.log(`setCursorPos col:${col}`);
+    if (col == -1) {
+        if (typeof txtNode.data === "undefined") c=0;
+        else c=txtNode.data.length;
+    } else {
+      c=col-1;
+      if (c < 0 || typeof txtNode.data === "undefined") c=0;
+      else if (c > txtNode.data.length-1) c=txtNode.data.length-1;
+    }
+
+    setCleanCursorPos(txtNode, c);
+    elt.focus();
+    return [ l/2+1, c+1 ];
+  }
+
+  function goToLine(n, col=0) {
     if (n < 1) n = 1;
     maxN = file_text.innerText.count_lines() + 1;
     if (n > maxN) n = maxN;
@@ -274,7 +272,7 @@ if (typeof app.sysname !== "undefined") {
     current_sub_number.value = nextSub(n);
     current_sub_time.value = nextTime(n);
     //file_text.focus();
-    setCursorPos(n, 1);
+    setCursorPos(file_text, n, col);
     //console.log(`current_sub_number:${current_sub_number.value}, current_sub_time:${current_sub_time.value}`);
   }
 
@@ -388,20 +386,12 @@ if (typeof app.sysname !== "undefined") {
 
     current_line_number.addEventListener("input", (e) => {
       goToLine(e.target.value);
-      setCaret(e);
       e.target.focus();
-    });
-    current_line_number.addEventListener("focusout", (e) => {
-      setCaret(e);
     });
 
     current_sub_number.addEventListener("input", (e) => {
       goToSub(e.target.value);
-      setCaret(e);
       e.target.focus();
-    });
-    current_sub_number.addEventListener("focusout", (e) => {
-      setCaret(e);
     });
 
     current_sub_time.addEventListener("input", (e) => {
@@ -411,14 +401,13 @@ if (typeof app.sysname !== "undefined") {
       ms = tc_to_ms(s);
       console.log("MS:" + ms);
       goToTime(ms + 1000);
-      //setCaret(e);
       e.target.focus();
     });
-    //current_sub_time.addEventListener("focusout", (e) => { setCaret(e); });
 
     toTop.addEventListener("click", () => {
-      goToLine(1);
+      goToLine(0);
     });
+
     toMiddleLine.addEventListener("click", () => {
       goToLine(file_text.innerText.count_lines() / 2);
     });
@@ -432,7 +421,7 @@ if (typeof app.sysname !== "undefined") {
     });
 
     toBottom.addEventListener("click", () => {
-      goToLine(file_text.innerText.count_lines() + 2);
+      goToLine(file_text.innerText.count_lines(), -1);
     });
 
     reRun.addEventListener("click", async () => {
@@ -474,7 +463,7 @@ if (typeof app.sysname !== "undefined") {
     }
 
     function rm_1l(arr_sub, first = false) {
-      console.log(`Avant, il y a ${arr_sub.texts.length} lignes`);
+      //console.log(`Avant, il y a ${arr_sub.texts.length} lignes`);
       var ln = "",
         txt;
       if (first) {
@@ -486,7 +475,7 @@ if (typeof app.sysname !== "undefined") {
         if (arr_sub.lines.length > arr_sub.texts.length) arr_sub.lines.pop();
         arr_sub.undo_str = txt + "\n" + arr_sub.undo_str;
       }
-      console.log(`Après, il y a ${arr_sub.texts.length} lignes`);
+      //console.log(`Après, il y a ${arr_sub.texts.length} lignes`);
     }
 
     function resize_sub(arr_sub) {
@@ -506,7 +495,7 @@ if (typeof app.sysname !== "undefined") {
         "undo_str": ""
       };
       arr_sub.texts.slice().some((item, index, array) => {
-        console.log(`item: [${item}]`);
+        //console.log(`item: [${item}]`);
         if (item == "") {
           rm_1l(arr_sub, true);
           return true;
@@ -520,6 +509,7 @@ if (typeof app.sysname !== "undefined") {
       });
       resize_sub(arr_sub);
       goToLine(0);
+      undoRem.disabled=false;
     });
 
     // Remove last subtitle
@@ -554,6 +544,7 @@ if (typeof app.sysname !== "undefined") {
       });
       resize_sub(arr_sub);
       goToLine(arr_sub.texts.length);
+      undoRem.disabled=false;
     });
 
     // Restore previous removal of first or last subtitle
@@ -563,31 +554,33 @@ if (typeof app.sysname !== "undefined") {
 
       if (undo_rem.length > 0) {
         var last_rem = undo_rem.pop();
-        console.log(`Avant, il y a ${file_lines.innerText.count_lines()} lignes`);
+        //console.log(`Avant, il y a ${file_lines.innerText.count_lines()} lignes`);
         for (il = 1; il <= last_rem.text.count_lines(); il++) {
           file_lines.innerText += "\n" + (nl + il);
         }
         var addl = file_lines.innerText.count_lines() + 1;
-        console.log(`Aprés, il y a ${addl} lignes`);
-        console.log(last_rem);
+        //console.log(`Aprés, il y a ${addl} lignes`);
+        //console.log(last_rem);
         file_lines.style.height = addl + 'em';
         file_text.style.height = addl + 'em';
 
         if (last_rem.first) {
-          console.log(`Inserting: ${last_rem.text.count_lines()} lines: ${last_rem.text}`);
+          //console.log(`Inserting: ${last_rem.text.count_lines()} lines: ${last_rem.text}`);
           if (file_text.innerText.charAt(0) !== "") file_text.innerText = "\n" + file_text.innerText;
           file_text.innerText = last_rem.text + file_text.innerText;
+          file_text.innerText.parseSubtitles();
           goToLine(0);
         } else {
-          console.log(`Adding: ${last_rem.text.count_lines()} lines`);
+          //console.log(`Adding: ${last_rem.text.count_lines()} lines`);
           if (file_text.innerText.charAt(file_text.innerText.length - 1) !== "\n") file_text.innerText += "\n";
           file_text.innerText += last_rem.text;
-          goToLine(nl + il);
+          file_text.innerText.parseSubtitles();
+          goToLine(nl + il, -1);
         }
-
-        file_text.innerText.parseSubtitles();
       }
 
+      //console.log(`undo_rem.length:${undo_rem.length}`);
+      if (undo_rem.length === 0) undoRem.disabled=true;
     });
 
     file_text.addEventListener("focusin", (e) => {
