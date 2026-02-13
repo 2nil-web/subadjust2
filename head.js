@@ -76,6 +76,11 @@ function real_exit() {
   app.exit();
 }
 
+async function save_exit() {
+  await save_file();
+  real_exit();
+}
+
 async function clean_exit() {
   //console.log("clean_exit");
   var actualSubText = file_text.innerText;
