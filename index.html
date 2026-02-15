@@ -7,18 +7,19 @@
   <title>SubAdjust</title>
   <link rel="icon" type="image/x-icon" href="app.svg">
   <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" type="text/css" href="animation.css">
   <script type="text/javascript" src="head.js"></script>
 
 <body>
   <img id="load_img" src="loader.svg" />
   <div class="topnav">
-    <a onclick="open_file()">Open</a>
-    <a onclick="save_file()">Save</a>
-    <a onclick="saveas_file()">Save As</a>
-    <a onclick="reload_file()">Reload</a>
-    <a style="position: absolute; right:115px;" onclick="about()">About</a>
-    <a style="position: absolute; right:44px;" onclick="save_exit()" title="">Save&Quit</a>
-    <a style="position: absolute; right:7px;" onclick="clean_exit()">Quit</a>
+    <a class="filip-vertical" onclick="open_file()">Open</a>
+    <a class="rotate-360-clockwise" onclick="save_file()">Save</a>
+    <a class="rotate-360-anticlockwise" onclick="saveas_file()">Save As</a>
+    <a class="filip-horizontal" onclick="reload_file()">Reload</a>
+    <a class="change-radius" style="position: absolute; right:115px;" onclick="about()">About</a>
+    <a class="rotate-clockwise" style="position: absolute; right:44px;" onclick="save_exit()" title="">Save&Quit</a>
+    <a class="rotate-anti-clockwise" style="position: absolute; right:7px;" onclick="clean_exit()">Quit</a>
   </div>
   <fieldset id="fsFile">
     <legend>Input file</legend>
@@ -33,9 +34,9 @@
         <a id="toMiddleSub">Sub</a>
         <a id="toMiddleTime">Time</a>
       </fieldset>
-      <a id="toTop">Start</a>
-      <a id="remFirst" title="Remove first subtitle lines">Delete first sub</a>
-      <a id="undoRem" title="Undo last removal" />Undelete</a>
+      <a class="move-up" id="toTop">Start</a>
+      <a class="move-up" id="remFirst" title="Remove first subtitle lines">Delete first sub</a>
+      <a class="move-right" id="undoRem" title="Undo last removal" />Undelete</a>
 
       <fieldset class="inFsGo" id="inputs">
         <legend align="center">Line, sub or time value ...</legend>
@@ -43,8 +44,8 @@
         <input id="current_sub_number" type="number" class"smallnum" step="1" value="1" min="1" max="99999" />
         <input id="current_sub_time" type="time" step="1" value="00:00:00" />
       </fieldset>
-      <a id="toBottom">End</a>
-      <a id="remLast" title="Remove last subtitle lines">Delete last sub</a>
+      <a class="move-down" id="toBottom">End</a>
+      <a class="move-down" id="remLast" title="Remove last subtitle lines">Delete last sub</a>
       <div id="Edit">
         <input type="text" list="re_list" id="reSrch" value="/{\\an8}/g" title="Search and replace with javascript RegExp (See RegExp literal:&#013;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp)" />
         <datalist id="re_list">
@@ -60,7 +61,7 @@
 
   <div class="topnav">
     <fieldset id="fsAdj">
-      <legend align="center"><a onclick="subAdjust()" title="Click to apply to the subtitles your changes in the inputs">Subtitles Adjustment by ...</a></legend>
+      <legend align="center"><a class="expand-up-down" onclick="subAdjust()" title="Click to apply to the subtitles your changes in the inputs">Subtitles Adjustment by ...</a></legend>
       <table>
         <tr>
           <td>

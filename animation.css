@@ -1,0 +1,153 @@
+.change-bgcolor:hover {
+  background-color: crimson;
+  transition: all 1s;
+}
+
+.change-font-color:hover {
+  transition: all 1s;
+  color: blue;
+}
+
+.move-right:hover {
+  background-color: crimson;
+  transition: all .5s;
+  transform: translateX(10px);
+}
+
+.move-left:hover {
+  background-color: crimson;
+  transition: all .5s;
+  transform: translateX(-10px);
+}
+
+.move-up:hover {
+  background-color: crimson;
+  transition: all .5s;
+  transform: translateY(-10px);
+}
+
+.move-down:hover {
+  background-color: crimson;
+  transition: all .5s;
+  transform: translateY(10px);
+}
+
+.zoom-in:hover {
+  background-color: crimson;
+  transition: all .5s;
+  transform: scale(1.5);
+}
+
+.zoom-out:hover {
+  background-color: crimson;
+  transition: all 1s;
+  transform: scale(.5);
+}
+
+
+.change-radius:hover {
+  background-color: crimson;
+  transition: all 1s;
+  border-radius: 50%;
+}
+
+.expand-left-right:hover {
+  background-color: crimson;
+  transition: all 1s;
+  transform: scaleX(1.5);
+}
+
+.expand-up-down:hover {
+  background-color: crimson;
+  transition: all 1s;
+  transform: scaleY(1.5);
+}
+
+.rotate-clockwise:hover {
+  background-color: crimson;
+  transition: all 1s;
+  -webkit-transform: rotateZ(30deg);
+  -ms-transform: rotateZ(30deg);
+  transform: rotateZ(30deg);
+}
+
+.rotate-anti-clockwise:hover {
+  background-color: crimson;
+  transition: all 1s;
+  -webkit-transform: rotateZ(-30deg);
+  -ms-transform: rotateZ(-30deg);
+  transform: rotateZ(-30deg);
+}
+
+.rotate-360-clockwise:hover {
+  background-color: crimson;
+  transition: all 1s;
+  -webkit-transform: rotateZ(360deg);
+  -ms-transform: rotateZ(360deg);
+  transform: rotateZ(360deg);
+}
+
+.rotate-360-anticlockwise:hover {
+  background-color: crimson;
+  transition: all 1s;
+  -webkit-transform: rotateZ(-360deg);
+  -ms-transform: rotateZ(-360deg);
+  transform: rotateZ(-360deg);
+}
+
+.filip-horizontal:hover {
+  background-color: crimson;
+  transition: all 2s;
+  -webkit-transform: rotateY(-360deg);
+  -ms-transform: rotateY(-360deg);
+  transform: rotateY(-360deg);
+}
+
+.filip-horizontal-mirror:hover {
+  background-color: crimson;
+  transition: all 2s;
+  -webkit-transform: rotateY(180deg);
+  -ms-transform: rotateY(180deg);
+  transform: rotateY(180deg);
+}
+
+.filip-vertical:hover {
+  background-color: crimson;
+  transition: all 2s;
+  -webkit-transform: rotateX(-360deg);
+  -ms-transform: rotateX(-360deg);
+  transform: rotateX(-360deg);
+}
+
+.filip-vertical-mirror:hover {
+  background-color: crimson;
+  transition: all 2s;
+  -webkit-transform: rotateX(180deg);
+  -ms-transform: rotateX(180deg);
+  transform: rotateX(180deg);
+}
+
+.inset-box-shadow:hover {
+  background-color: crimson;
+  transition: all 1s;
+  box-shadow: inset 0 0 0 20px #2f2f2f;
+  font-size: 25px;
+}
+
+.offset-box-shadow:hover {
+  background-color: crimson;
+  transition: all 1s;
+  box-shadow: 0 0 0 20px #2f2f2f;
+}
+
+.smooth-offset-box-shadow:hover {
+  background-color: crimson;
+  transition: all 1s;
+  box-shadow: 0 0 20px 20px #2f2f2f;
+}
+
+.smooth-inset-box-shadow:hover {
+  background-color: crimson;
+  transition: all 1s;
+  box-shadow: inset 0 0 20px 20px #2f2f2f;
+}
