@@ -17,7 +17,7 @@
     <a onclick="saveas_file()">Save As</a>
     <a onclick="reload_file()">Reload</a>
     <a style="position: absolute; right:115px;" onclick="about()">About</a>
-    <a style="position: absolute; right:44px;" onclick="save_exit()"title="">Save&Quit</a>
+    <a style="position: absolute; right:44px;" onclick="save_exit()" title="">Save&Quit</a>
     <a style="position: absolute; right:7px;" onclick="clean_exit()">Quit</a>
   </div>
   <fieldset id="fsFile">
@@ -29,11 +29,11 @@
       <legend>Go to and Edit</legend>
       <fieldset class="inFsGo">
         <legend align="center">Middle ...</legend>
-        <a id="toMiddleLine">line</a>
-        <a id="toMiddleSub">sub</a>
-        <a id="toMiddleTime">time</a>
+        <a id="toMiddleLine">Line</a>
+        <a id="toMiddleSub">Sub</a>
+        <a id="toMiddleTime">Time</a>
       </fieldset>
-      <a id="toTop">start</a>
+      <a id="toTop">Start</a>
       <a id="remFirst" title="Remove first subtitle lines">Delete first sub</a>
       <a id="undoRem" title="Undo last removal" />Undelete</a>
 
@@ -43,13 +43,16 @@
         <input id="current_sub_number" type="number" class"smallnum" step="1" value="1" min="1" max="99999" />
         <input id="current_sub_time" type="time" step="1" value="00:00:00" />
       </fieldset>
-      <a id="toBottom">end</a>
+      <a id="toBottom">End</a>
       <a id="remLast" title="Remove last subtitle lines">Delete last sub</a>
       <div id="Edit">
-        <input type="text" list="re_list" id="reSrch" value="/{\\an8}/g" title="Search and replace with javascript RegExp (See RegExp literal:&#013;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp)"/>
-        <datalist id="re_list"><option value="/{\\an8}/g"></option></datalist>
+        <input type="text" list="re_list" id="reSrch" value="/{\\an8}/g" title="Search and replace with javascript RegExp (See RegExp literal:&#013;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp)" />
+        <datalist id="re_list">
+          <option value="/{\\an8}/g"></option>
+        </datalist>
         <input type="text" id="reRepl" />
-        <input type="button" id="reRun" value="Replace" title="Replace all the occurrence of the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not." />
+        <!--input type="button" id="reRun" value="Replace" title="Replace all the occurrence of the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not." /-->
+        <a id="reRun" title="Replace all the occurrence of the RegExp to the subtitle and blinks its border.&#013;Green blinking means the RegExp was successful.&#013;Red blinking means it was not.">Replace</a>
       </div>
     </fieldset>
   </div>

@@ -243,29 +243,29 @@ if (typeof app.sysname !== "undefined") {
   }
 
   function setCursorPos(elt, lin, col) {
-    var l=2*(lin-1);
-    if (l < 0) l=0;
-    else if (l > elt.childNodes.length-1) l=elt.childNodes.length-1;
+    var l = 2 * (lin - 1);
+    if (l < 0) l = 0;
+    else if (l > elt.childNodes.length - 1) l = elt.childNodes.length - 1;
 
     var txtNode = elt.childNodes[l];
     var c;
 
     //console.log(`setCursorPos col:${col}`);
     if (col == -1) {
-        if (typeof txtNode.data === "undefined") c=0;
-        else c=txtNode.data.length;
+      if (typeof txtNode.data === "undefined") c = 0;
+      else c = txtNode.data.length;
     } else {
-      c=col-1;
-      if (c < 0 || typeof txtNode.data === "undefined") c=0;
-      else if (c > txtNode.data.length-1) c=txtNode.data.length-1;
+      c = col - 1;
+      if (c < 0 || typeof txtNode.data === "undefined") c = 0;
+      else if (c > txtNode.data.length - 1) c = txtNode.data.length - 1;
     }
 
     setCleanCursorPos(txtNode, c);
     elt.focus();
-    return [ l/2+1, c+1 ];
+    return [l / 2 + 1, c + 1];
   }
 
-  function goToLine(n, col=0) {
+  function goToLine(n, col = 0) {
     if (n < 1) n = 1;
     maxN = file_text.innerText.count_lines() + 1;
     if (n > maxN) n = maxN;
@@ -514,7 +514,7 @@ if (typeof app.sysname !== "undefined") {
       });
       resize_sub(arr_sub);
       goToLine(0);
-      undoRem.disabled=false;
+      undoRem.disabled = false;
     });
 
     // Remove last subtitle
@@ -549,7 +549,7 @@ if (typeof app.sysname !== "undefined") {
       });
       resize_sub(arr_sub);
       goToLine(arr_sub.texts.length);
-      undoRem.disabled=false;
+      undoRem.disabled = false;
     });
 
     // Restore previous removal of first or last subtitle
@@ -585,7 +585,7 @@ if (typeof app.sysname !== "undefined") {
       }
 
       //console.log(`undo_rem.length:${undo_rem.length}`);
-      if (undo_rem.length === 0) undoRem.disabled=true;
+      if (undo_rem.length === 0) undoRem.disabled = true;
     });
 
     file_text.addEventListener("focusin", (e) => {
@@ -754,10 +754,13 @@ String.prototype.parseSubtitles = function() {
   correctSubText = correctSubText.remove_last_empty_lines();
   nlines = correctSubText.count_lines() + 1;
 
-  file_lines.innerHTML = "";
+  //file_lines.innerHTML = "";
+  var s = "";
   for (var il = 1; il <= nlines; il++) {
-    file_lines.innerHTML += il + '\n';
+    if (il % 2 === 0) s += '<p style="background-color: #FFA07A">' + il.toString().padStart(5, "0") + '</p>';
+    else s += '<p style="background-color: #FFD700">' + il.toString().padStart(5, "0") + '</p>';
   }
+  file_lines.innerHTML = s;
 
   file_lines.style.height = nlines.toString() + "em";
   //file_lines.style.width="2em";
