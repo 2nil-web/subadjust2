@@ -764,6 +764,7 @@ String.prototype.parseSubtitles = function() {
 
   file_lines.style.height = nlines.toString() + "em";
   //file_lines.style.width="2em";
+  //console.log(correctSubText);
   file_text.innerText = correctSubText;
   file_text.style.height = nlines.toString() + "em";
   var fatc = "00:00:00,000",
